@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Lexend } from 'next/font/google';
 import ReactQueryProvider from '../components/providers/ReactQueryProvider';
 import './globals.css';
 
-const inter = Inter({
+const lexend = Lexend({
   variable: '--font-sans',
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800', '900'],
+  weight: ['400', '500', '600', '700', '800'],
 });
 
 export const metadata: Metadata = {
@@ -23,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} antialiased text-foreground bg-background`}
+        className={`${lexend.variable} antialiased text-foreground bg-background`}
       >
         <ReactQueryProvider>{children}</ReactQueryProvider>
       </body>

@@ -1,71 +1,60 @@
-// src/components/features/layout/AppHeader.tsx
-'use client'; // Necesario para el hook usePathname
+'use client';
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils'; // Utilidad de Shadcn para unir clases
-import { Bell, Settings, Stethoscope, User } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { Stethoscope } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import UserMenu from './UserMenu';
 
 const navLinks = [
-  { href: '/doctors', label: 'Find Doctors' },
-  { href: '/medicines', label: 'Medicines' },
-  { href: '/symptom-guide', label: 'Symptom Guide' },
+  { href: '/doctors', label: 'Encuentra Doctores' },
+  { href: '/medicines', label: 'Medicinas' },
+  { href: '/symptom-guide', label: 'Guía de Síntomas' },
 ];
 
 export default function AppHeader() {
   const pathname = usePathname();
+  const { user, status } = useCurrentUser();
+  const isAuthenticated = !!user && status === 'authenticated';
+
+  const renderLink = (href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <header className="container mx-auto px-4 py-3 border-b">
-      <nav className="flex justify-between items-center">
+    <header className="container mx-auto px-4 py-5">
+      <nav className="flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2 text-xl font-bold">
             <Stethoscope className="h-7 w-7 text-green-600" />
-            <span className="text-gray-800">MediApp</span>
+            <span>VitalSync</span>
           </Link>
-          <div className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  'text-gray-600 hover:text-green-600 transition-colors',
-                  {
-                    'text-green-600 font-semibold border-b-2 border-green-600 pb-1':
-                      pathname === link.href,
-                  }
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
         </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full bg-green-50 hover:bg-green-100"
-          >
-            <Bell className="h-5 w-5 text-gray-600" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full bg-green-50 hover:bg-green-100"
-          >
-            <Settings className="h-5 w-5 text-gray-600" />
-          </Button>
-          <Link href="/dashboard/profile">
-            <Avatar className="ml-2">
-              <AvatarFallback className="bg-orange-100">
-                <User className="h-5 w-5 text-orange-500" />
-              </AvatarFallback>
-            </Avatar>
-          </Link>
+        <div className="hidden md:flex items-center gap-6">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                'transition-colors',
+                renderLink(link.href) && 'font-semibold '
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+        <div className="flex items-center gap-3">
+          {isAuthenticated ? (
+            <UserMenu />
+          ) : (
+            <Link href="/login">
+              <Button size="sm" className="px-6">
+                Iniciar Sesión
+              </Button>
+            </Link>
+          )}
         </div>
       </nav>
     </header>

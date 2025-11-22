@@ -50,7 +50,7 @@
   --color-ring: var(--ring);
 
   /* --- Fuentes --- */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Lexend', system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
 
   /* --- Texto y Neutros --- */
@@ -72,9 +72,10 @@
   --color-border-strong: #cebfa9;
   --color-border-muted: #f1e7d4;
 
-  /* --- Radios de Borde (Combinados) --- */
-  --radius-DEFAULT: var(--radius); /* Usa el radio base definido en :root */
-  --radius-md: 0.95rem; /* Radio más orgánico para tarjetas */
+  /* --- Radios de Borde --- */
+  --radius-sm: 0.32rem;
+  --radius: 0.64rem;
+  --radius-md: 0.6rem;
   --radius-lg: 1.25rem;
   --radius-pill: 999px;
 

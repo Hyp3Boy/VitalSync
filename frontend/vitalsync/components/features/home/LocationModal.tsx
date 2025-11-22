@@ -22,10 +22,12 @@ import { locationSchema } from '@/lib/validations/location';
 import { LocationData, useLocationStore } from '@/store/useLocationStore';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Loader2, MapPin, SearchIcon, Target } from 'lucide-react';
+import { Loader2, MapPin, Target } from 'lucide-react';
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
+import Link from 'next/link';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 // Mock data (en un caso real, vendría de una API)
 const mockAddresses = [
@@ -44,15 +46,17 @@ const LocationSearchForm = () => {
   const [isSearching, setIsSearching] = useState(false);
 
   // Aplicamos el debounce al término de búsqueda
-  const debouncedSearchTerm = useDebounce(searchTerm, 350);
-  const commandRef = useRef(null) as RefObject<HTMLElement>;
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const commandRef = useRef<HTMLDivElement | null>(null);
 
   const form = useForm<z.infer<typeof locationSchema>>({
     resolver: zodResolver(locationSchema),
     defaultValues: { address: '', city: '', postalCode: '' },
   });
 
-  useOnClickOutside(commandRef, () => setCommandListVisible(false));
+  useOnClickOutside(commandRef as RefObject<HTMLElement>, () =>
+    setCommandListVisible(false)
+  );
 
   useEffect(() => {
     let isCancelled = false;
@@ -95,8 +99,8 @@ const LocationSearchForm = () => {
       form.setValue('postalCode', postalCodeMatch[0], { shouldValidate: true });
     }
 
-    setSearchTerm(address); // Sincroniza el término de búsqueda con la selección
-    setCommandListVisible(false); // Oculta la lista
+    setSearchTerm(address);
+    setCommandListVisible(false);
   };
 
   function onSubmit(values: z.infer<typeof locationSchema>) {
@@ -112,12 +116,11 @@ const LocationSearchForm = () => {
           control={form.control}
           name="address"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="h-12 border-2 border-border-muted rounded-md">
               <FormControl>
                 <div ref={commandRef} className="relative">
-                  <Command className="overflow-visible rounded-2xl border border-border-muted bg-card/80 shadow-soft backdrop-blur">
-                    <div className="relative">
-                      <SearchIcon className="pointer-events-none absolute left-4 h-5 w-5 text-muted-foreground" />
+                  <Command>
+                    <div className="relative h-full">
                       <CommandInput
                         aria-label="Buscar dirección"
                         placeholder="Escribe tu dirección o barrio"
@@ -128,7 +131,7 @@ const LocationSearchForm = () => {
                           setCommandListVisible(Boolean(value));
                         }}
                         onFocus={() => setCommandListVisible(true)}
-                        className="h-14 w-full rounded-2xl border-none bg-transparent pl-12 pr-12 text-base placeholder:text-text-tertiary"
+                        className="w-full bg-transparent px-4 py-3 text-base placeholder:text-muted-foreground border-0"
                       />
                       {isSearching && (
                         <Loader2 className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
@@ -139,7 +142,7 @@ const LocationSearchForm = () => {
                       {isCommandListVisible &&
                         (isSearching || debouncedSearchTerm.length > 0) && (
                           <motion.div
-                            className="absolute top-full z-10 mt-3 w-full overflow-hidden rounded-2xl border border-border-muted bg-card shadow-xl"
+                            className="absolute top-full z-10 mt-3 w-full overflow-hidden rounded-2xl border-2 border-border-muted bg-card shadow-xl"
                             initial={{ opacity: 0, y: -6, scale: 0.98 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -6, scale: 0.98 }}
@@ -189,11 +192,7 @@ const LocationSearchForm = () => {
           )}
         />
 
-        <Button
-          type="submit"
-          size="lg"
-          className="w-full bg-brand-green hover:bg-brand-green-hover text-lg h-12"
-        >
+        <Button type="submit" size="lg" className="w-full text-lg">
           Continuar
         </Button>
       </form>
@@ -202,24 +201,26 @@ const LocationSearchForm = () => {
 };
 
 // --- Componente Principal del Modal ---
-export default function LocationModal() {
+export default function LocationModal({
+  isAuthenticated,
+}: {
+  isAuthenticated: boolean;
+}) {
   const { detectAndSetLocation, isLoading, error } = useLocationStore();
 
   return (
-    <section className="md:min-w-md">
-      <div className="text-center items-center">
-        <h1 className="text-3xl md:text-4xl font-black mb-3">
-          Configura tu Ubicación
-        </h1>
-        <p className="text-text-secondary">
-          Para encontrar médicos y servicios cerca de ti.
+    <section className="w-full max-w-xl space-y-6">
+      <div className="text-center space-y-2">
+        <h1 className="text-4xl font-black text-[#5b3d2b]">Bienvenido</h1>
+        <p className="text-base text-[#856d5d]">
+          Por favor, indícanos tu ubicación para continuar.
         </p>
       </div>
 
-      <div className="flex flex-col gap-4 py-10">
+      <div className="rounded-3xl border border-border bg-card p-8 shadow-xl">
         <Button
           size="lg"
-          className="text-lg h-14"
+          className="mb-6 h-12 w-full rounded-2xl bg-[#4d7757] text-white text-base hover:bg-[#43684c]"
           onClick={detectAndSetLocation}
           disabled={isLoading}
         >
@@ -232,18 +233,49 @@ export default function LocationModal() {
         </Button>
 
         {error && (
-          <p className="text-sm text-center text-destructive">{error}</p>
+          <p className="mb-4 text-center text-sm text-destructive">{error}</p>
         )}
 
-        <div className="relative flex py-5 items-center">
-          <div className="grow border-t"></div>
-          <span className="shrink mx-4 text-sm text-muted-foreground">
-            o ingresa tu ubicación manualmente
-          </span>
-          <div className="grow border-t"></div>
+        <div className="relative flex items-center py-5 text-sm text-muted-foreground">
+          <div className="grow border-t border-border" />
+          <span className="mx-4">o</span>
+          <div className="grow border-t border-border" />
+        </div>
+
+        <div className="mb-6 text-center space-y-1">
+          <p className="text-lg font-bold">Ingresar ubicación manualmente</p>
+          <p className="text-xs text-muted-foreground">
+            Completa tu dirección para personalizar tu experiencia.
+          </p>
         </div>
 
         <LocationSearchForm />
+      </div>
+
+      <div className="rounded-2xl bg-[#efe8df] px-4 py-3 text-center text-sm text-[#5c3d2a]">
+        Para guardar direcciones,{' '}
+        {isAuthenticated ? (
+          <span className="font-semibold text-primary">
+            ya estás autenticado.
+          </span>
+        ) : (
+          <>
+            <Link
+              href="/login"
+              className="font-semibold text-primary underline-offset-2 hover:underline"
+            >
+              ingresa
+            </Link>{' '}
+            o{' '}
+            <Link
+              href="/register"
+              className="font-semibold text-primary underline-offset-2 hover:underline"
+            >
+              crea una cuenta
+            </Link>
+            .
+          </>
+        )}
       </div>
     </section>
   );

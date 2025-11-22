@@ -8,7 +8,7 @@ const actions = [
     title: 'Emergencias',
     desc: 'SAMU, Bomberos, Hospital',
     Icon: Siren,
-    href: '#',
+    href: '/emergency',
     special: 'SOS',
   },
   {
@@ -27,7 +27,7 @@ const actions = [
     title: 'Guía de Síntomas',
     desc: 'Revisa tus síntomas',
     Icon: BriefcaseMedical,
-    href: '/symptom-checker',
+    href: '/symptom-guide',
   },
 ];
 
@@ -52,7 +52,7 @@ export default function QuickActions() {
                     className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
                       isEmergency
                         ? 'bg-red-500 text-white'
-                        : 'bg-green-100 text-green-700'
+                        : 'bg-primary/10 text-primary'
                     }`}
                   >
                     {special ? (
