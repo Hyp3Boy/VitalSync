@@ -10,7 +10,10 @@ class MedicationSearchRequest(BaseModel):
 class MedicationSummary(BaseModel):
     id: str
     name: str
+    generic: bool
     description: str
+    price: float
+    pharmacy: str
 
 
 class MedicationsListResponse(BaseModel):
@@ -21,7 +24,10 @@ class MedicationsListResponse(BaseModel):
 class MedicationDetail(BaseModel):
     id: str
     name: str
+    generic: bool
     description: str
+    price: float
+    pharmacy: str
     ingredients: str
     side_effects: str
     usage: str
