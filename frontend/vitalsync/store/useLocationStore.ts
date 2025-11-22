@@ -1,30 +1,74 @@
-// src/store/useLocationStore.ts
+import { STORAGE_KEYS } from '@/lib/constants/storage';
 import { create } from 'zustand';
 
-// Este será el tipo de dato para nuestra ubicación final
 export interface LocationData {
   address: string;
   city: string;
   postalCode: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 interface LocationState {
   location: LocationData | null;
   isLocationModalOpen: boolean;
-  isLoading: boolean; // Para mostrar un spinner mientras se detecta
+  isLoading: boolean;
   error: string | null;
   setLocation: (location: LocationData) => void;
+  clearLocation: () => void;
+  hydrateLocation: () => void;
   openLocationModal: () => void;
   closeLocationModal: () => void;
-  detectAndSetLocation: () => void; // Nueva acción para la detección
+  detectAndSetLocation: () => void;
 }
+
+const persistLocation = (location: LocationData | null) => {
+  if (typeof window === 'undefined') return;
+  if (!location) {
+    window.localStorage.removeItem(STORAGE_KEYS.activeLocation);
+    return;
+  }
+  window.localStorage.setItem(
+    STORAGE_KEYS.activeLocation,
+    JSON.stringify(location)
+  );
+};
+
+const readStoredLocation = (): LocationData | null => {
+  if (typeof window === 'undefined') return null;
+  const rawValue = window.localStorage.getItem(STORAGE_KEYS.activeLocation);
+  if (!rawValue) return null;
+  try {
+    return JSON.parse(rawValue) as LocationData;
+  } catch (error) {
+    console.warn('No se pudo interpretar la ubicación almacenada', error);
+    window.localStorage.removeItem(STORAGE_KEYS.activeLocation);
+    return null;
+  }
+};
 
 export const useLocationStore = create<LocationState>((set) => ({
   location: null,
   isLocationModalOpen: false,
   isLoading: false,
   error: null,
-  setLocation: (location) => set({ location, isLocationModalOpen: false }),
+  setLocation: (location) =>
+    set(() => {
+      persistLocation(location);
+      return { location, isLocationModalOpen: false };
+    }),
+  clearLocation: () =>
+    set(() => {
+      persistLocation(null);
+      return { location: null };
+    }),
+  hydrateLocation: () =>
+    set((state) => {
+      if (state.location) return state;
+      const stored = readStoredLocation();
+      if (!stored) return state;
+      return { ...state, location: stored };
+    }),
   openLocationModal: () => set({ isLocationModalOpen: true, error: null }),
   closeLocationModal: () => set({ isLocationModalOpen: false }),
   detectAndSetLocation: () => {
@@ -51,11 +95,16 @@ export const useLocationStore = create<LocationState>((set) => ({
             address: 'Av. Javier Prado Este 4600',
             city: 'Lima',
             postalCode: '15023',
+            latitude: -12.071655,
+            longitude: -77.033667,
           };
-          set({
-            location: mockLocation,
-            isLoading: false,
-            isLocationModalOpen: false,
+          set(() => {
+            persistLocation(mockLocation);
+            return {
+              location: mockLocation,
+              isLoading: false,
+              isLocationModalOpen: false,
+            };
           });
         }, 1500);
       },

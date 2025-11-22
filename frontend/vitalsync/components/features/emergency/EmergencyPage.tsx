@@ -17,13 +17,7 @@ export const EmergencyPage = () => {
 
       <div className="grid gap-10 lg:grid-cols-2">
         <EmergencyContacts />
-        <EmergencyMap
-          latitude={-12.0464}
-          longitude={-77.0428}
-          facilityName="Hospital Nacional Arzobispo Loayza"
-          address="Av. Alfonso Ugarte 848, Cercado de Lima"
-          travelTime="~15 minutos en auto"
-        />
+        <EmergencyMap />
       </div>
     </div>
   );

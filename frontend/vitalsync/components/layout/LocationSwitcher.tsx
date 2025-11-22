@@ -74,6 +74,8 @@ export const LocationSwitcher = () => {
       address: location.addressLine,
       city: '',
       postalCode: '',
+      latitude: location.latitude,
+      longitude: location.longitude,
     });
   };
 

@@ -13,6 +13,7 @@ import { LocationData } from '@/store/useLocationStore';
 import { AlertTriangle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import MapboxMap from '../location/MapboxMap';
 
 // --- MOCK DATA ---
 const mockClinics: Clinic[] = [
@@ -83,8 +84,9 @@ interface NearbyResultsProps {
 export default function NearbyResults({ location }: NearbyResultsProps) {
   // Estados para simular la llamada a la API
   const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
+  const [isError, setIsError] = useState(false);  
   const [data, setData] = useState<Clinic[] | null>(null);
+  const [select, setSelect] = useState<string | null>(data.id);
 
   const fetchData = () => {
     console.log('Buscando resultados para:', location.address);
@@ -141,10 +143,26 @@ export default function NearbyResults({ location }: NearbyResultsProps) {
           ) : isError ? (
             <ErrorState onRetry={fetchData} />
           ) : data && data.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {data.map((clinic) => (
-                <ClinicCard key={clinic.id} clinic={clinic} />
-              ))}
+            <div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {data.map((clinic) => (
+                  <ClinicCard key={clinic.id} clinic={clinic} />
+                ))}
+              </div>
+              <MapboxMap
+                initialViewState={{
+                  latitude: location.latitude,
+                  longitude: location.longitude,
+                  zoom: 12,
+                }}
+                markers={data.map((clinic) => ({
+                  id: clinic.id,
+                  latitude: location.latitude + (Math.random() - 0.5) * 0.1, // Simula posiciones cercanas
+                  longitude: location.longitude + (Math.random() - 0.5) * 0.1, // Simula posiciones cercanas
+                  title: clinic.name,
+                }))}
+                className="mt-8 h-64 rounded-lg"
+              />
             </div>
           ) : (
             <EmptyState />

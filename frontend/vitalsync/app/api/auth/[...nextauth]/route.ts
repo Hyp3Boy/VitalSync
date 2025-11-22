@@ -40,7 +40,6 @@ const handler = NextAuth({
   pages: {
     signIn: '/login', // Redirige a tu página de login si el usuario no está autenticado
   },
-  // ... callbacks para JWT y session, si necesitas guardar el token
 });
 
 export { handler as GET, handler as POST };
