@@ -1,6 +1,5 @@
 import AppHeader from '@/components/layout/AppHeader';
 import { LocationSwitcher } from '@/components/layout/LocationSwitcher';
-import { LocationGuard } from '@/components/layout/LocationGuard';
 import ToasterClient from '@/components/ui/ToasterClient';
 
 export default function MainLayout({
@@ -11,10 +10,10 @@ export default function MainLayout({
   return (
     <div className="flex flex-col min-h-screen mx-auto max-w-6xl">
       <AppHeader />
-      <LocationSwitcher />
-      <main className="grow container mx-auto px-4 py-8">
-        <LocationGuard>{children}</LocationGuard>
-      </main>
+      <div className="mt-4">
+        <LocationSwitcher />
+      </div>
+      <main className="grow container mx-auto p-4">{children}</main>
       <ToasterClient />
     </div>
   );

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { LocationGuard } from '@/components/layout/LocationGuard';
 import ReactQueryProvider from '../components/providers/ReactQueryProvider';
 import './globals.css';
 
@@ -25,7 +26,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} antialiased text-foreground bg-background`}
       >
-        <ReactQueryProvider>{children}</ReactQueryProvider>
+        <ReactQueryProvider>
+          <LocationGuard>{children}</LocationGuard>
+        </ReactQueryProvider>
       </body>
     </html>
   );

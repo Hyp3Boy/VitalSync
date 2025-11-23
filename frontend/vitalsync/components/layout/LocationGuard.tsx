@@ -28,7 +28,7 @@ export const LocationGuard = ({ children }: PropsWithChildren) => {
 
   if (!isBootstrapped) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground h-full">
+      <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground min-h-screen">
         <Loader2 className="mb-4 h-6 w-6 animate-spin" />
         <p>Verificando tus preferencias de ubicación...</p>
       </div>

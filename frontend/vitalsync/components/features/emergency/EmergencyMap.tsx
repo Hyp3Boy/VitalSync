@@ -1,7 +1,7 @@
 'use client';
 
 import MapboxMap from '@/components/features/location/MapboxMap';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
   ToggleGroup,
@@ -11,6 +11,8 @@ import { useEmergencyCenters } from '@/hooks/useEmergencyCenters';
 import { haversineDistanceKm } from '@/lib/utils';
 import { useLocationStore } from '@/store/useLocationStore';
 import { Loader2, MapPin, Siren } from 'lucide-react';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
 
 const DISTANCE_OPTIONS = [5, 10, 20, 50];
@@ -164,15 +166,14 @@ export const EmergencyMap = () => {
                 Espera aprox. {nearestCenter.waitTimeMinutes} min
               </span>
             </div>
-            <Button size="lg" className="w-full" asChild>
-              <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${nearestCenter.latitude},${nearestCenter.longitude}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Obtener indicaciones
-              </a>
-            </Button>
+            <Link
+              href={`https://www.google.com/maps/dir/?api=1&destination=${nearestCenter.latitude},${nearestCenter.longitude}`}
+              target="_blank"
+              rel="noreferrer"
+              className={cn(buttonVariants({ size: 'lg' }), 'w-full justify-center')}
+            >
+              Obtener indicaciones
+            </Link>
           </Card>
         )}
       </div>

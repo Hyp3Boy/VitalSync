@@ -4,6 +4,7 @@ import { useCallback } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import useChatStore, { ChatMessage } from '@/store/useChatStore'
 import { fetchChatHistory, sendMessageToBackend } from '@/services/chatService'
+import { toast } from 'sonner'
 
 export function useChatHistory() {
   const setMessages = useChatStore((s) => s.addMessage)
@@ -18,6 +19,9 @@ export function useChatHistory() {
     onSuccess(data) {
       clear()
       data.forEach(setMessages)
+    },
+    onError() {
+      toast.error('No pudimos cargar tu historial. Intenta nuevamente más tarde.')
     },
   })
 
@@ -41,6 +45,7 @@ export function useSendMessage() {
     },
     onError() {
       setTyping(false)
+      toast.error('Hubo un problema al enviar tu mensaje. Revisa tu conexión.')
     },
   })
 

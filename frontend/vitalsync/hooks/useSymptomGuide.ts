@@ -15,6 +15,9 @@ export const useSymptomGuide = () => {
     queryKey: ['symptom-guide'],
     queryFn: fetchSymptomGuide,
     staleTime: 1000 * 60 * 5,
+    onError: () => {
+      toast.error('No pudimos cargar la guía de síntomas. Revisa tu conexión.')
+    },
   })
 
   const mutation = useMutation({

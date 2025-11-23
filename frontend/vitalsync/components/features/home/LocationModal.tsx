@@ -4,6 +4,7 @@ import MapboxMap, {
   MapboxMapHandle,
 } from '@/components/features/location/MapboxMap';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import {
   Command,
   CommandEmpty,
@@ -35,6 +36,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
+import { toast } from 'sonner';
 
 const DEFAULT_VIEW_STATE = {
   latitude: -12.046374,
@@ -42,7 +44,11 @@ const DEFAULT_VIEW_STATE = {
   zoom: 11,
 };
 
-const LocationSearchForm = () => {
+const LocationSearchForm = ({
+  onLocationSaved,
+}: {
+  onLocationSaved?: () => void;
+}) => {
   const { setLocation } = useLocationStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [isCommandListVisible, setCommandListVisible] = useState(false);
@@ -105,11 +111,12 @@ const LocationSearchForm = () => {
       })
       .catch((error) => {
         if (error.name === 'AbortError') return;
-        setSearchError(
+        const message =
           error instanceof Error
             ? error.message
-            : 'No pudimos buscar la dirección. Intenta nuevamente.'
-        );
+            : 'No pudimos buscar la dirección. Intenta nuevamente.';
+        setSearchError(message);
+        toast.error(message);
       })
       .finally(() => {
         setIsSearching(false);
@@ -148,6 +155,7 @@ const LocationSearchForm = () => {
     form.reset();
     setSearchTerm('');
     setSelectedSuggestion(null);
+    onLocationSaved?.();
   }
 
   const markers = useMemo(() => {
@@ -181,7 +189,9 @@ const LocationSearchForm = () => {
         { signal: controller.signal }
       );
       if (!result) {
-        setSearchError('No pudimos encontrar una dirección para ese punto.');
+        const message = 'No pudimos encontrar una dirección para ese punto.';
+        setSearchError(message);
+        toast.error(message);
         setSelectedSuggestion(null);
         return;
       }
@@ -190,11 +200,12 @@ const LocationSearchForm = () => {
       setSearchTerm(result.addressLine);
     } catch (error) {
       if ((error as Error).name === 'AbortError') return;
-      setSearchError(
+      const message =
         error instanceof Error
           ? error.message
-          : 'No pudimos convertir ese punto en una dirección.'
-      );
+          : 'No pudimos convertir ese punto en una dirección.';
+      setSearchError(message);
+      toast.error(message);
     } finally {
       setIsSearching(false);
     }
@@ -207,7 +218,7 @@ const LocationSearchForm = () => {
           control={form.control}
           name="address"
           render={({ field }) => (
-            <FormItem className="rounded-xl border-2 border-border-muted">
+            <FormItem className="rounded-xl border-2 border-border-muted h-12">
               <FormControl>
                 <div ref={commandRef} className="relative">
                   <Command>
@@ -295,12 +306,12 @@ const LocationSearchForm = () => {
           control={form.control}
           name="city"
           render={({ field }) => (
-            <FormItem className="rounded-xl border-2 border-border-muted">
+            <FormItem className="rounded-xl border-2 border-border-muted h-12">
               <FormControl>
                 <input
                   {...field}
                   placeholder="Ciudad"
-                  className="w-full bg-transparent px-4 py-3 text-base placeholder:text-muted-foreground border-0 ring-0"
+                  className="w-full bg-transparent px-4 text-base placeholder:text-muted-foreground h-full rounded-xl focus-visible:ring-border-muted focus-visible:ring-2 focus-visible:box-shadow-none border-0"
                 />
               </FormControl>
               <FormMessage />
@@ -312,12 +323,12 @@ const LocationSearchForm = () => {
           control={form.control}
           name="postalCode"
           render={({ field }) => (
-            <FormItem className="rounded-xl border-2 border-border-muted">
+            <FormItem className="rounded-xl border-2 border-border-muted h-12">
               <FormControl>
                 <input
                   {...field}
                   placeholder="Código postal"
-                  className="w-full bg-transparent px-4 py-3 text-base placeholder:text-muted-foreground border-0 focus:ring-0 ring-0"
+                  className="w-full bg-transparent px-4 text-base placeholder:text-muted-foreground h-full rounded-xl focus-visible:ring-border-muted focus-visible:ring-2 focus-visible:box-shadow-none border-0"
                 />
               </FormControl>
               <FormMessage />
@@ -351,46 +362,84 @@ const LocationSearchForm = () => {
 
 export default function LocationModal({
   isAuthenticated,
+  onLocationSaved,
+  variant = 'full',
 }: {
   isAuthenticated: boolean;
+  onLocationSaved?: () => void;
+  variant?: 'full' | 'compact';
 }) {
   const { detectAndSetLocation, isLoading, error } = useLocationStore();
+  const currentLocation = useLocationStore((state) => state.location);
+  const [awaitingDetectResult, setAwaitingDetectResult] = useState(false);
+  const isCompact = variant === 'compact';
+
+  useEffect(() => {
+    if (!onLocationSaved) return;
+    if (!awaitingDetectResult) return;
+    if (currentLocation) {
+      onLocationSaved();
+      setAwaitingDetectResult(false);
+    }
+  }, [awaitingDetectResult, currentLocation, onLocationSaved]);
+
+  useEffect(() => {
+    if (!awaitingDetectResult) return;
+    if (!error) return;
+    setAwaitingDetectResult(false);
+  }, [awaitingDetectResult, error]);
+
+  const handleDetectLocation = () => {
+    setAwaitingDetectResult(true);
+    detectAndSetLocation();
+  };
 
   return (
     <section className="w-full max-w-2xl space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="text-4xl font-black">Bienvenido</h1>
-        <p className="text-base">
-          Detecta tu ubicación automáticamente o búscala en el mapa para
-          comenzar.
-        </p>
-      </div>
-
-      <div className="rounded-3xl border border-border bg-card p-8 shadow-xl">
-        <Button
-          type="submit"
-          size="lg"
-          className="w-full text-lg"
-          onClick={detectAndSetLocation}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-          ) : (
-            <Target className="mr-2 h-5 w-5" />
-          )}
-          Detectar mi Ubicación
-        </Button>
-
-        {error && (
-          <p className="mb-4 text-center text-sm text-destructive">{error}</p>
-        )}
-
-        <div className="relative flex items-center py-5 text-sm text-muted-foreground">
-          <div className="grow border-t border-border" />
-          <span className="mx-4">o</span>
-          <div className="grow border-t border-border" />
+      {!isCompact && (
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-black">Bienvenido</h1>
+          <p className="text-base">
+            Detecta tu ubicación automáticamente o búscala en el mapa para
+            comenzar.
+          </p>
         </div>
+      )}
+
+      <div
+        className={cn(
+          'rounded-3xl border border-border bg-card p-8 shadow-xl',
+          isCompact && 'border-transparent shadow-none'
+        )}
+      >
+        {!isCompact && (
+          <>
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full text-lg"
+              onClick={handleDetectLocation}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <Target className="mr-2 h-5 w-5" />
+              )}
+              Detectar mi Ubicación
+            </Button>
+
+            {error && (
+              <p className="mt-4 text-center text-sm text-destructive">{error}</p>
+            )}
+
+            <div className="relative flex items-center py-5 text-sm text-muted-foreground">
+              <div className="grow border-t border-border" />
+              <span className="mx-4">o</span>
+              <div className="grow border-t border-border" />
+            </div>
+          </>
+        )}
 
         <div className="mb-6 text-center space-y-1">
           <p className="text-xl font-bold">Buscar en el mapa</p>
@@ -399,34 +448,36 @@ export default function LocationModal({
           </p>
         </div>
 
-        <LocationSearchForm />
+        <LocationSearchForm onLocationSaved={onLocationSaved} />
       </div>
 
-      <div className="rounded-2xl bg-[#efe8df] px-4 py-3 text-center text-sm text-[#5c3d2a]">
-        Para guardar direcciones,{' '}
-        {isAuthenticated ? (
-          <span className="font-semibold text-primary">
-            ya estás autenticado.
-          </span>
-        ) : (
-          <>
-            <Link
-              href="/login"
-              className="font-semibold text-primary underline-offset-2 hover:underline"
-            >
-              ingresa
-            </Link>{' '}
-            o{' '}
-            <Link
-              href="/register"
-              className="font-semibold text-primary underline-offset-2 hover:underline"
-            >
-              crea una cuenta
-            </Link>
-            .
-          </>
-        )}
-      </div>
+      {!isCompact && (
+        <div className="rounded-2xl bg-[#efe8df] px-4 py-3 text-center text-sm text-[#5c3d2a]">
+          Para guardar direcciones,{' '}
+          {isAuthenticated ? (
+            <span className="font-semibold text-primary">
+              ya estás autenticado.
+            </span>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="font-semibold text-primary underline-offset-2 hover:underline"
+              >
+                ingresa
+              </Link>{' '}
+              o{' '}
+              <Link
+                href="/login"
+                className="font-semibold text-primary underline-offset-2 hover:underline"
+              >
+                crea una cuenta
+              </Link>
+              .
+            </>
+          )}
+        </div>
+      )}
     </section>
   );
 }

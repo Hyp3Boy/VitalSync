@@ -1,7 +1,6 @@
 'use client'; // Marcamos como Client Component para usar hooks
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { clsx } from 'clsx';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
@@ -15,7 +14,7 @@ import {
 // import { registerUser, loginUser } from '@/services/authService'; // Aún no lo creamos, pero lo importaremos
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ToggleGroup, ToggleGroupItem } from '@radix-ui/react-toggle-group';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Placeholder para las funciones del servicio
 const registerUser = async (data: TRegisterSchema) => {
@@ -79,163 +78,162 @@ export function AuthForm() {
 
   return (
     <main className="w-full rounded-xl bg-[#fefdf7] dark:bg-background-dark/50 p-6 shadow-lg shadow-black/5 ring-1 ring-black/5 sm:p-8">
-      {/* Selector de modo con Headless UI para accesibilidad */}
-      <ToggleGroup
-        type="single"
+      <Tabs
         value={authMode}
-        onValueChange={(value: AuthMode) => {
-          if (value) setAuthMode(value);
-        }}
-        className="mb-8 w-full"
+        onValueChange={(value) => value && setAuthMode(value as AuthMode)}
+        className="w-full"
       >
-        <ToggleGroupItem value="Register" className="w-full">
-          Register
-        </ToggleGroupItem>
-        <ToggleGroupItem value="Login" className="w-full">
-          Login
-        </ToggleGroupItem>
-      </ToggleGroup>
+        <TabsList className="mb-4 w-full bg-[#efe6d7] text-[#5c3d2a]">
+          <TabsTrigger value="Register" className="flex-1 rounded-4xl">
+            Crear cuenta
+          </TabsTrigger>
+          <TabsTrigger value="Login" className="flex-1 rounded-4xl">
+            Iniciar sesión
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Formulario de Registro */}
-      <form
-        onSubmit={handleRegisterSubmit(onRegister)}
-        className={clsx(
-          'flex-col space-y-5',
-          authMode === 'Register' ? 'flex' : 'hidden'
-        )}
-      >
-        {/* ... Campos del formulario ... */}
-        <div className="space-y-1">
-          <label
-            className="text-base font-medium text-brown-accent dark:text-[#f0e6c8]"
-            htmlFor="dni-reg"
+        <TabsContent value="Register">
+          <form
+            onSubmit={handleRegisterSubmit(onRegister)}
+            className="flex flex-col space-y-3"
           >
-            DNI
-          </label>
-          <Input
-            id="dni-reg"
-            placeholder="Enter your DNI"
-            type="text"
-            {...registerField('dni')}
-          />
-          {registerErrors.dni && (
-            <p className="text-sm text-error">{registerErrors.dni.message}</p>
-          )}
-        </div>
-        {/* Repetir para otros campos: fullName, phone, email, password */}
-        <div className="space-y-1">
-          <label
-            className="text-base font-medium text-brown-accent dark:text-[#f0e6c8]"
-            htmlFor="name-reg"
-          >
-            Full Name
-          </label>
-          <Input
-            id="name-reg"
-            placeholder="Enter your full name"
-            type="text"
-            {...registerField('fullName')}
-          />
-          {registerErrors.fullName && (
-            <p className="text-sm text-error">
-              {registerErrors.fullName.message}
-            </p>
-          )}
-        </div>
-        <div className="space-y-1">
-          <label
-            className="text-base font-medium text-brown-accent dark:text-[#f0e6c8]"
-            htmlFor="email-reg"
-          >
-            Email Address
-          </label>
-          <Input
-            id="email-reg"
-            placeholder="Enter your email"
-            type="email"
-            {...registerField('email')}
-          />
-          {registerErrors.email && (
-            <p className="text-sm text-error">{registerErrors.email.message}</p>
-          )}
-        </div>
-        <div className="space-y-1">
-          <label
-            className="text-base font-medium text-brown-accent dark:text-[#f0e6c8]"
-            htmlFor="password-reg"
-          >
-            Password
-          </label>
-          <Input
-            id="password-reg"
-            placeholder="Create a password"
-            type="password"
-            {...registerField('password')}
-          />
-          {registerErrors.password && (
-            <p className="text-sm text-error">
-              {registerErrors.password.message}
-            </p>
-          )}
-        </div>
+            <div>
+              <label
+                className="text-base font-medium text-brown-accent dark:text-[#f0e6c8]"
+                htmlFor="dni-reg"
+              >
+                DNI
+              </label>
+              <Input
+                id="dni-reg"
+                className="mt-1"
+                placeholder="Ingresa tu DNI"
+                type="text"
+                {...registerField('dni')}
+              />
+              {registerErrors.dni && (
+                <p className="text-sm text-error">
+                  {registerErrors.dni.message}
+                </p>
+              )}
+            </div>
+            {/* Repetir para otros campos: fullName, phone, email, password */}
+            <div className="space-y-1">
+              <label
+                className="text-base font-medium text-brown-accent dark:text-[#f0e6c8]"
+                htmlFor="name-reg"
+              >
+                Nombre Completo
+              </label>
+              <Input
+                id="name-reg"
+                className="mt-1"
+                type="text"
+                {...registerField('fullName')}
+              />
+              {registerErrors.fullName && (
+                <p className="text-sm text-error">
+                  {registerErrors.fullName.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-1">
+              <label
+                className="text-base font-medium text-brown-accent dark:text-[#f0e6c8]"
+                htmlFor="email-reg"
+              >
+                Correo Electrónico
+              </label>
+              <Input
+                className="mt-1"
+                id="email-reg"
+                type="email"
+                {...registerField('email')}
+              />
+              {registerErrors.email && (
+                <p className="text-sm text-error mt-1">
+                  {registerErrors.email.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-1">
+              <label
+                className="text-base font-medium text-brown-accent dark:text-[#f0e6c8]"
+                htmlFor="password-reg"
+              >
+                Contraseña
+              </label>
+              <Input
+                id="password-reg"
+                type="password"
+                {...registerField('password')}
+              />
+              {registerErrors.password && (
+                <p className="text-sm text-error">
+                  {registerErrors.password.message}
+                </p>
+              )}
+            </div>
 
-        <div className="pt-3">
-          <Button type="submit" isLoading={isRegistering}>
-            Register
-          </Button>
-        </div>
-      </form>
+            <div className="pt-3 w-full place-content-center grid">
+              <Button type="submit" isLoading={isRegistering} className="px-12">
+                Registrar
+              </Button>
+            </div>
+          </form>
+        </TabsContent>
 
-      {/* Formulario de Login */}
-      <form
-        onSubmit={handleLoginSubmit(onLogin)}
-        className={clsx(
-          'flex-col space-y-5',
-          authMode === 'Login' ? 'flex' : 'hidden'
-        )}
-      >
-        <div className="space-y-1">
-          <label
-            className="text-base font-medium text-brown-accent dark:text-[#f0e6c8]"
-            htmlFor="email-login"
+        <TabsContent value="Login">
+          <form
+            onSubmit={handleLoginSubmit(onLogin)}
+            className="flex flex-col space-y-5"
           >
-            Email or DNI
-          </label>
-          <Input
-            id="email-login"
-            placeholder="Enter your email or DNI"
-            type="text"
-            {...loginField('identifier')}
-          />
-          {loginErrors.identifier && (
-            <p className="text-sm text-error">
-              {loginErrors.identifier.message}
-            </p>
-          )}
-        </div>
-        <div className="space-y-1">
-          <label
-            className="text-base font-medium text-brown-accent dark:text-[#f0e6c8]"
-            htmlFor="password-login"
-          >
-            Password
-          </label>
-          <Input
-            id="password-login"
-            placeholder="Enter your password"
-            type="password"
-            {...loginField('password')}
-          />
-          {loginErrors.password && (
-            <p className="text-sm text-error">{loginErrors.password.message}</p>
-          )}
-        </div>
-        <div className="pt-3">
-          <Button type="submit" isLoading={isLoggingIn}>
-            Login
-          </Button>
-        </div>
-      </form>
+            <div className="space-y-1">
+              <label
+                className="text-base font-medium text-brown-accent dark:text-[#f0e6c8]"
+                htmlFor="email-login"
+              >
+                Correo Electrónico o DNI
+              </label>
+              <Input
+                id="email-login"
+                type="text"
+                className="mt-1"
+                {...loginField('identifier')}
+              />
+              {loginErrors.identifier && (
+                <p className="text-sm text-error">
+                  {loginErrors.identifier.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-1">
+              <label
+                className="text-base font-medium text-brown-accent dark:text-[#f0e6c8]"
+                htmlFor="password-login"
+              >
+                Contraseña
+              </label>
+              <Input
+                id="password-login"
+                type="password"
+                className="mt-1"
+                {...loginField('password')}
+              />
+              {loginErrors.password && (
+                <p className="text-sm text-error">
+                  {loginErrors.password.message}
+                </p>
+              )}
+            </div>
+            <div className="pt-3 w-full place-content-center grid">
+              <Button type="submit" isLoading={isRegistering} className="px-12">
+                Iniciar sesión
+              </Button>
+            </div>
+          </form>
+        </TabsContent>
+      </Tabs>
     </main>
   );
 }

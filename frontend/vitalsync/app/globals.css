@@ -48,6 +48,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-error: var(--destructive);
 
   /* --- Fuentes --- */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;

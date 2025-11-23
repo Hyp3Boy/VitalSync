@@ -17,7 +17,11 @@ import Map, {
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 export interface MapboxMapHandle {
-  flyTo: (params: { latitude: number; longitude: number; zoom?: number }) => void;
+  flyTo: (params: {
+    latitude: number;
+    longitude: number;
+    zoom?: number;
+  }) => void;
 }
 
 export interface MapboxMarker {
@@ -37,6 +41,10 @@ interface MapboxMapProps extends PropsWithChildren {
   markers?: MapboxMarker[];
   mapStyle?: string;
   onMapClick?: (coordinates: { latitude: number; longitude: number }) => void;
+  userLocation?: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
 const DEFAULT_STYLE = 'mapbox://styles/mapbox/streets-v12';
@@ -50,6 +58,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(
       markers = [],
       onMapClick,
       children,
+      userLocation,
     },
     ref
   ) => {
@@ -70,11 +79,14 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(
       return (
         <div
           className={cn(
-            'flex h-64 w-full items-center justify-center rounded-2xl border border-dashed border-destructive/40 bg-destructive/5 p-6 text-center text-sm text-destructive',
+            'flex h-full w-full items-center justify-center rounded-2xl border border-dashed border-destructive/40 bg-destructive/5 p-6 text-center text-sm text-destructive',
             className
           )}
         >
-          Configura <code className="font-mono text-xs">NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN</code>{' '}
+          Configura{' '}
+          <code className="font-mono text-xs">
+            NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
+          </code>{' '}
           para visualizar el mapa.
         </div>
       );
@@ -91,7 +103,7 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(
     return (
       <div
         className={cn(
-          'relative h-64 w-full overflow-hidden rounded-2xl shadow-inner',
+          'relative h-full w-full overflow-hidden rounded-2xl shadow-inner',
           className
         )}
       >
@@ -129,6 +141,20 @@ const MapboxMap = forwardRef<MapboxMapHandle, MapboxMapProps>(
             </Marker>
           ))}
           {children}
+          {userLocation && (
+            <Marker
+              latitude={userLocation.latitude}
+              longitude={userLocation.longitude}
+              anchor="center"
+            >
+              <div className="flex flex-col items-center">
+                <span className="block size-4 rounded-full border-2 border-white bg-[#3b82f6] shadow-lg" />
+                <span className="mt-1 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-[#1d4ed8] shadow">
+                  Tú
+                </span>
+              </div>
+            </Marker>
+          )}
         </Map>
       </div>
     );

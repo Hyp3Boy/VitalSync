@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { AuthForm } from '@/components/features/authentication/AuthForm';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
@@ -39,7 +39,7 @@ export default function LoginPage() {
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center p-4 sm:p-6 md:p-8">
       <div className="w-full max-w-lg">
-        <header className="flex w-full items-center justify-center gap-3 py-8 text-center text-brown-accent dark:text-[#f0e6c8]">
+        <header className="flex w-full items-center justify-center gap-3 py-8 text-center text-brown-accent">
           <div className="size-10 text-primary">Icono</div>
           <h1 className="text-3xl font-bold tracking-tight">VitalSync</h1>
         </header>

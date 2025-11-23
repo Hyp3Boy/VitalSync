@@ -1,7 +1,8 @@
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Doctor } from '@/types/doctor';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 const renderStars = (rating: number) =>
   Array.from({ length: 5 }).map((_, index) => (
@@ -50,9 +51,15 @@ export const DoctorCard = ({ doctor }: DoctorCardProps) => {
         </div>
 
         <div className="mt-auto pt-2">
-          <Button asChild className="w-full" size="sm">
-            <Link href={`/doctors/${doctor.id}`}>Ver Perfil</Link>
-          </Button>
+          <Link
+            href={`/doctors/${doctor.id}`}
+            className={cn(
+              buttonVariants({ size: 'sm' }),
+              'w-full justify-center'
+            )}
+          >
+            Ver Perfil
+          </Link>
         </div>
       </CardContent>
     </Card>

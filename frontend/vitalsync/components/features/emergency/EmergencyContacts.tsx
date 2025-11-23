@@ -1,5 +1,6 @@
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 import { Ambulance, Siren, type LucideIcon } from 'lucide-react';
 
 type Contact = {
@@ -62,9 +63,15 @@ export const EmergencyContacts = () => {
               </div>
             </div>
 
-            <Button asChild size="sm" className="w-full">
-              <a href={`tel:${contact.shortNumber}`}>Llamar ahora</a>
-            </Button>
+            <a
+              className={cn(
+                buttonVariants({ size: 'sm' }),
+                'w-full justify-center'
+              )}
+              href={`tel:${contact.shortNumber}`}
+            >
+              Llamar ahora
+            </a>
           </Card>
         ))}
       </div>
