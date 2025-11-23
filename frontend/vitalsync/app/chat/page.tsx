@@ -1,4 +1,4 @@
-import ChatWindow from '@/components/features/chat/ChatWindow';
+import ChatInterface from '@/components/features/chat/ChatInterfaceFixed';
 
 export const metadata = {
   title: 'Chat - VitalSync',
@@ -6,8 +6,8 @@ export const metadata = {
 
 export default function Page() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center py-10">
-      <ChatWindow />
+    <main className="flex min-h-screen flex-col bg-[var(--background)]">
+      <ChatInterface />
     </main>
   );
 }
