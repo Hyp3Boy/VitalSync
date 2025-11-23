@@ -1,17 +1,27 @@
-FROM python:3.11-slim
+FROM python:3.11.9-slim
 
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-RUN apt-get update && apt-get install -y --no-install-recommends build-essential \
+# Dependencias del sistema
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential gcc libpq-dev curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml ./
+# Instala pip y herramientas de construcción
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
-COPY . /app
+# Copia solo pyproject.toml y requirements primero para cache
+COPY pyproject.toml ./
+
+# Instala dependencias
 RUN pip install --no-cache-dir -e .
 
+# Copia el resto del proyecto
+COPY . .
+
 EXPOSE 8000
-CMD ["uvicorn", "api.api:APP", "--host", "0.0.0.0", "--port", "8000"]
+RUN pip install uv
+RUN uv sync
+CMD ["uv","run","main.py"]

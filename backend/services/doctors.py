@@ -41,7 +41,7 @@ class DoctorService:
                 specialties=doc["especialidades"] if "especialidades" in doc else [
                 ],
                 n_comments=doc['total_resenas'],
-                sc_acum=doc['score_sum']
+                sc_acum=doc['rating_promedio']
             ))
 
         return DoctorQueryResult(results=top_items)
@@ -60,7 +60,7 @@ class DoctorService:
             name=doc.get('nombre_completo', 'john doe'),
             specialties=doc["especialidades"] if "especialidades" in doc else [],
             n_comments=doc['total_resenas'],
-            sc_acum=doc['score_sum']
+            sc_acum=doc['rating_promedio']
         )
         return doctor_summary
 
