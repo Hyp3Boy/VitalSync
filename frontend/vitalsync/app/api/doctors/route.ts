@@ -42,7 +42,12 @@ const filterMockDoctors = (params: DoctorQueryParams): DoctorListResponse => {
 
   if (params.specialty) {
     filtered = filtered.filter(
-      (doctor) => doctor.specialty === params.specialty
+      (doctor) => {
+        const specialties = doctor.specialties?.length
+          ? doctor.specialties
+          : [doctor.specialty];
+        return specialties.includes(params.specialty as string);
+      }
     );
   }
 
@@ -77,8 +82,23 @@ const filterMockDoctors = (params: DoctorQueryParams): DoctorListResponse => {
   };
 };
 
+const shouldSkipRemoteFetch = (request: NextRequest) => {
+  const base = process.env.NEXT_PUBLIC_API_URL;
+  if (!base) return true;
+  try {
+    const remote = new URL(base);
+    return remote.origin === request.nextUrl.origin;
+  } catch {
+    return true;
+  }
+};
+
 export async function GET(request: NextRequest) {
   const params = normalizeParams(request.nextUrl.searchParams);
+
+  if (shouldSkipRemoteFetch(request)) {
+    return NextResponse.json(filterMockDoctors(params));
+  }
 
   try {
     const response = await api.get<DoctorListResponse>('/doctors', {
@@ -91,3 +111,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(fallback);
   }
 }
+
+// BACKEND CONTRACT:
+// GET /doctors?search&specialty&insurance&location&minRating&page&perPage
+// -> returns DoctorListResponse { items, total, page, perPage, totalPages }

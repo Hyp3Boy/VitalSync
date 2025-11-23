@@ -35,7 +35,7 @@ export const DoctorSearchHeader = ({
         <p className="text-base text-muted-foreground">
           {totalResults > 0
             ? `Mostrando ${totalResults} resultados`
-            : 'Explora especialistas por nombre, especialidad o seguro'}
+            : 'Explora especialistas por nombre o especialidad'}
         </p>
       </div>
 

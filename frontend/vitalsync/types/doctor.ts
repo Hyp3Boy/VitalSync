@@ -4,6 +4,7 @@ export interface Doctor {
   id: string;
   name: string;
   specialty: string;
+  specialties?: string[];
   cmp: string;
   rating: number; // promedio 0-5
   ratingCount: number;
@@ -21,12 +22,26 @@ export interface DoctorReview {
   createdAt: string;
 }
 
+export interface DoctorScheduleDay {
+  day: string;
+  slots: string[] | null;
+  note?: string;
+}
+
+export interface DoctorCoordinates {
+  latitude: number;
+  longitude: number;
+}
+
 export interface DoctorDetail extends Doctor {
+  specialties: string[];
   bio: string;
   yearsExperience: number;
   languages: string[];
   education: string;
   clinicAddress: string;
+  schedule?: DoctorScheduleDay[] | null;
+  coordinates?: DoctorCoordinates;
 }
 
 export interface DoctorQueryParams {

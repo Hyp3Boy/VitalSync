@@ -59,6 +59,8 @@ export const useDoctorsQuery = () => {
     [search, specialty, insurance, location, minRating, page, perPage]
   );
 
+  const hasPagination = Boolean(queryParams.page && queryParams.perPage);
+
   return useQuery({
     queryKey: ['doctors', queryParams],
     queryFn: () => fetchDoctors(queryParams),
@@ -66,5 +68,6 @@ export const useDoctorsQuery = () => {
     gcTime: 1000 * 60 * 30,
     placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,
+    enabled: hasPagination,
   });
 };

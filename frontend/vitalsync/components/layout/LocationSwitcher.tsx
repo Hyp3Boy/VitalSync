@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { useLocationStore } from '@/store/useLocationStore';
 import { useLocationPreferencesStore } from '@/store/useLocationPreferencesStore';
 import { useSavedLocationsQuery } from '@/hooks/useSavedLocationsQuery';
@@ -38,7 +39,7 @@ const locationTagIcon = (tag: string) => {
   }
 };
 
-export const LocationSwitcher = () => {
+export const LocationSwitcher = ({ className }: { className?: string }) => {
   const { user, status } = useCurrentUser();
   const isAuthenticated = !!user && status === 'authenticated';
   useSavedLocationsQuery(isAuthenticated);
@@ -80,15 +81,15 @@ export const LocationSwitcher = () => {
   };
 
   return (
-    <div className="container mx-auto flex justify-end">
+    <div className={cn('flex w-full justify-end', className)}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="w-full rounded-full border-border bg-card text-left text-sm font-medium px-4 py-2 md:w-auto md:px-3"
+            className="w-full rounded-full border-border bg-card text-left text-sm font-medium px-4 py-2 md:w-auto md:px-3 group min-w-0 justify-start"
           >
-            <MapPin className="mr-2 size-4 text-primary" />
-            <span className="truncate">Mi ubicación: {currentLabel}</span>
+            <MapPin className="mr-2 size-4 shrink-0 text-primary group-hover:text-white" />
+            <span className="truncate max-w-[60vw] md:max-w-[300px]">Mi ubicación: {currentLabel}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-72 p-2" align="start">

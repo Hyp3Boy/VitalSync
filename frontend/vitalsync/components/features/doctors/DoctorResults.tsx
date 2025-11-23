@@ -11,16 +11,25 @@ interface DoctorResultsProps {
 }
 
 const SkeletonCard = () => (
-  <div className="flex flex-col rounded-2xl border border-border bg-muted/20 p-6 shadow-sm">
-    <div className="flex gap-5">
-      <div className="mx-auto mb-4 size-24 rounded-full bg-muted animate-pulse" />
-      <div>
-        <div className="mx-auto mb-2 h-4 w-full rounded-full bg-muted animate-pulse" />
-        <div className="mx-auto mb-6 h-3 w-full rounded-full bg-muted animate-pulse" />
+  <div className="flex h-full flex-col gap-4 rounded-2xl border border-border/60 bg-card/60 p-6 shadow-sm">
+    <div className="flex items-center gap-4">
+      <span className="size-16 rounded-full bg-muted animate-pulse" />
+      <div className="flex-1 space-y-2">
+        <div className="h-3 w-1/3 rounded-full bg-muted animate-pulse" />
+        <div className="h-4 w-3/4 rounded-full bg-muted animate-pulse" />
+        <div className="h-3 w-1/2 rounded-full bg-muted animate-pulse" />
       </div>
     </div>
-    <div className="mt-auto space-y-3">
-      <div className="h-3 rounded-full bg-muted animate-pulse" />
+    <div className="flex items-center gap-2">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <span
+          key={index}
+          className="size-4 rounded-full bg-muted/70 animate-pulse"
+        />
+      ))}
+      <span className="h-3 w-24 rounded-full bg-muted/70 animate-pulse" />
+    </div>
+    <div className="mt-auto pt-2">
       <div className="h-10 rounded-full bg-muted animate-pulse" />
     </div>
   </div>
@@ -42,7 +51,7 @@ export const DoctorResults = ({ query }: DoctorResultsProps) => {
   const totalPages = data?.totalPages ?? 1;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 pb-6">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         {isLoading ? (
           Array.from({ length: 6 }).map((_, index) => (
