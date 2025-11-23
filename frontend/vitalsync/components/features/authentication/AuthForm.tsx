@@ -15,6 +15,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 // Placeholder para las funciones del servicio
 const registerUser = async (data: TRegisterSchema) => {
@@ -22,14 +24,20 @@ const registerUser = async (data: TRegisterSchema) => {
   await new Promise((r) => setTimeout(r, 1000));
 };
 const loginUser = async (data: TLoginSchema) => {
-  console.log('Logging in:', data);
-  await new Promise((r) => setTimeout(r, 1000));
+  const res = await fetch('/api/auth/mock-login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Credenciales inválidas');
+  return await res.json();
 };
 
 type AuthMode = 'Register' | 'Login';
 
 export function AuthForm() {
   const [authMode, setAuthMode] = useState<AuthMode>('Register');
+  const router = useRouter();
 
   // --- Lógica de Formulario de Registro ---
   const {
@@ -53,22 +61,25 @@ export function AuthForm() {
   const { mutate: performRegister, isPending: isRegistering } = useMutation({
     mutationFn: registerUser,
     onSuccess: () => {
-      // Ej: Redirigir al dashboard, mostrar toast de éxito
-      console.log('Registration successful!');
+      toast.success('Cuenta creada correctamente');
+      router.push('/');
     },
     onError: (error) => {
-      // Ej: Mostrar toast de error
-      console.error('Registration failed:', error);
+      toast.error(error instanceof Error ? error.message : 'No se pudo registrar la cuenta');
     },
   });
 
   const { mutate: performLogin, isPending: isLoggingIn } = useMutation({
     mutationFn: loginUser,
-    onSuccess: () => {
-      console.log('Login successful!');
+    onSuccess: (user) => {
+      const { useAuthStore } = require('@/store/useAuthStore');
+      const { actions } = useAuthStore.getState();
+      actions.setUser(user);
+      toast.success('Inicio de sesión exitoso');
+      router.push('/');
     },
     onError: (error) => {
-      console.error('Login failed:', error);
+      toast.error(error instanceof Error ? error.message : 'No pudimos iniciar sesión');
     },
   });
 
@@ -227,7 +238,7 @@ export function AuthForm() {
               )}
             </div>
             <div className="pt-3 w-full place-content-center grid">
-              <Button type="submit" isLoading={isRegistering} className="px-12">
+              <Button type="submit" isLoading={isLoggingIn} className="px-12">
                 Iniciar sesión
               </Button>
             </div>

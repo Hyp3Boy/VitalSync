@@ -7,6 +7,7 @@ import { Stethoscope } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import UserMenu from './UserMenu';
+import Image from 'next/image';
 
 const navLinks = [
   { href: '/doctors', label: 'Encuentra Doctores' },
@@ -26,8 +27,12 @@ export default function AppHeader() {
     <header className="container mx-auto px-4 py-5">
       <nav className="flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2 text-xl font-bold">
-            <Stethoscope className="h-7 w-7 text-green-600" />
+          <Link href="/" className="flex items-center gap-2 text-xl font-bold"><Image
+                      src="/assets/images/logo.png"
+                      alt="VitalSync Logo"
+                      width={40}
+                      height={40}
+                    />
             <span>VitalSync</span>
           </Link>
         </div>

@@ -423,7 +423,7 @@ export default function ChatInterface() {
       <div className="w-80 bg-white/60 backdrop-blur-sm border-l border-amber-200/50 p-6">
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-bold text-amber-900 mb-4">Plantillas de Ayuda</h3>
+            <h3 className="text-lg font-bold text-amber-900 mb-2">Plantillas de Ayuda</h3>
             <p className="text-sm text-amber-700">Haz clic para usar una plantilla</p>
           </div>
 

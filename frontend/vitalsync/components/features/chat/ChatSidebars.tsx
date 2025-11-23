@@ -99,7 +99,7 @@ export function TemplateSidebar({ templates, onTemplateClick, className }: Templ
     <div className={cn("w-80 bg-[var(--card)]/60 backdrop-blur-sm border-l border-[var(--border)] p-6", className)}>
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-bold text-[var(--foreground)] mb-4">Plantillas de Ayuda</h3>
+          <h3 className="text-lg font-bold text-[var(--foreground)] mb-2">Plantillas de Ayuda</h3>
           <p className="text-sm text-[var(--muted-foreground)]">Haz clic para usar una plantilla</p>
         </div>
 

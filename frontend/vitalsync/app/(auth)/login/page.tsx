@@ -3,20 +3,29 @@
 import { AuthForm } from '@/components/features/authentication/AuthForm';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useAuthStore } from '@/store/useAuthStore';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const { user, status } = useCurrentUser();
   const { logout } = useAuthStore((state) => state.actions);
   const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
+
+  const isAuthenticatedClientSide =
+    isClient && status === 'authenticated' && Boolean(user);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => setIsClient(true));
     return () => cancelAnimationFrame(frame);
   }, []);
 
-  const isAuthenticatedClientSide =
-    isClient && status === 'authenticated' && Boolean(user);
+  useEffect(() => {
+    if (!isAuthenticatedClientSide || !user) return;
+    const timeout = setTimeout(() => router.push('/'), 3000);
+    return () => clearTimeout(timeout);
+  }, [isAuthenticatedClientSide, user, router]);
 
   if (isAuthenticatedClientSide && user) {
     return (
@@ -33,6 +42,7 @@ export default function LoginPage() {
         >
           Cierra sesión y vuelve a intentarlo
         </button>
+        <p className="mt-3 text-sm text-muted-foreground">Serás redirigido al inicio en 3 segundos.</p>
       </div>
     );
   }
@@ -40,7 +50,12 @@ export default function LoginPage() {
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center p-4 sm:p-6 md:p-8">
       <div className="w-full max-w-lg">
         <header className="flex w-full items-center justify-center gap-3 py-8 text-center text-brown-accent">
-          <div className="size-10 text-primary">Icono</div>
+          <Image
+            src="/assets/images/logo.png"
+            alt="VitalSync Logo"
+            width={40}
+            height={40}
+          />
           <h1 className="text-3xl font-bold tracking-tight">VitalSync</h1>
         </header>
         <AuthForm />

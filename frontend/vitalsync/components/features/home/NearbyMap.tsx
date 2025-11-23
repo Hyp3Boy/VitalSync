@@ -181,7 +181,7 @@ export default function NearbyResults({ location }: NearbyResultsProps) {
           </div>
 
           <Link
-            href="/centros"
+            href="/centers"
             className={cn(
               buttonVariants({ variant: 'ghost' }),
               'w-fit justify-between gap-10'

@@ -1,7 +1,7 @@
 import ChatInterface from '@/components/features/chat/ChatInterfaceFixed';
 
 export const metadata = {
-  title: 'Chat - VitalSync',
+  title: 'Chat | VitalSync',
 };
 
 export default function Page() {

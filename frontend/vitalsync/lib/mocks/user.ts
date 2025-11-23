@@ -5,7 +5,8 @@ export const mockUsers: UserProfile[] = [
     id: 'user-123',
     fullName: 'María Fernanda Rojas',
     email: 'maria.rojas@example.com',
-    role: 'patient',
+    phone: '+51 987 654 321',
+    password: 'vitalsync123',
     profilePicturePath:
       'https://lh3.googleusercontent.com/a-/ALV-UjUes0y0maria-avatar',
   },
@@ -13,7 +14,8 @@ export const mockUsers: UserProfile[] = [
     id: 'user-456',
     fullName: 'Dr. Esteban Quiroz',
     email: 'e.quiroz@example.com',
-    role: 'doctor',
+    phone: '+51 999 111 222',
+    password: 'vitalsync456',
     profilePicturePath:
       'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=facearea&facepad=4&w=320&h=320&q=80',
   },
@@ -21,7 +23,8 @@ export const mockUsers: UserProfile[] = [
     id: 'user-789',
     fullName: 'Soledad Pinedo',
     email: 'soledad.pinedo@example.com',
-    role: 'admin',
+    phone: '+51 988 777 666',
+    password: 'vitalsync789',
     profilePicturePath:
       'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=facearea&facepad=4&w=320&h=320&q=80',
   },
