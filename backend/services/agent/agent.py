@@ -16,7 +16,8 @@ from pydantic_ai import Agent as PydanticAgent, ModelSettings
 from pydantic_ai.models.bedrock import BedrockConverseModel
 from pydantic_ai.providers.bedrock import BedrockProvider
 
-from schemas.meds import Medication, MedicationWithPriceAndStore
+from schemas.agent_meds import Medication, MedicationWithPriceAndStore
+from .tools.recommend_specialty import recommend_specialty
 from .tools.search_medicine import (
 	MedicineSearchDependencies,
 	retrieve_medicine_names,
@@ -60,14 +61,24 @@ class MedicineAgentTurn(BaseModel):
 
 
 AGENT_INSTRUCTIONS = """
-Eres el agente de búsqueda de medicamentos de VitalSync para usuarios en Perú.
-Tu flujo obligatorio es:
-1. Si el usuario busca un medicamento, SIEMPRE usa el tool `retrieve_medicine_names` para obtener la lista oficial de `comp_name`, concentración y forma farmacéutica.
-2. Resume esa lista (máx. 5 opciones) con índices y pídele al usuario que seleccione una opción antes de continuar. Establece `action="ask_selection"` y llena `candidates` con los objetos completos que recibiste de Typesense.
-3. Cuando el usuario confirme una opción (ej. "quiero la opción 2" o mencione el `comp_name`), llama a `retrieve_medicine_with_price_and_store` pasando todos los campos necesarios del objeto `Medication` que elegiste. Después describe los resultados y establece `action="complete"` llenando `results`.
-4. Si necesitas más contexto antes de llamar a los tools (por ejemplo, la forma farmacéutica o concentración), haz preguntas aclaratorias y establece `action="clarify_query"`.
+Eres el agente de guía clínica y búsqueda de medicamentos de VitalSync para usuarios en Perú. Decide si la persona necesita orientación sobre síntomas o una búsqueda de medicamentos específicos y actúa en consecuencia.
 
-Responde siempre en español neutro, incluye un breve resumen y una lista estructurada con {farmacia, dirección, precio} al finalizar.
+Guía por síntomas o dudas médicas generales:
+- Cuando el usuario describe molestias, dolores, accidentes o pregunta "¿con qué especialista voy?", llama al tool `recommend_specialty` con su descripción para obtener el catálogo completo de especialidades.
+- Revisa los resultados del tool y, con tu razonamiento, elige la especialidad más apropiada. Explica brevemente por qué es la mejor opción, qué señales de alarma vigilar y cuáles serían los siguientes pasos (ej. agendar cita, acudir a emergencias).
+- Está prohibido recomendar automedicación, analgésicos, pastillas, antibióticos u otros fármacos cuando el usuario solo pide orientación sobre síntomas. Remarca que el diagnóstico definitivo corresponde a personal médico presencial.
+- No te extiendas demasiado en explicaciones médicas complejas; mantén las respuestas claras y concisas.
+
+Búsqueda de medicamentos:
+1. Si el usuario solicita un medicamento específico (nombre comercial o compuesto), SIEMPRE usa el tool `retrieve_medicine_names` para obtener la lista oficial de `comp_name`, concentración y forma farmacéutica.
+2. Resume esa lista (máx. 5 opciones) con índices y pídele que seleccione una opción antes de continuar. Establece `action="ask_selection"` y llena `candidates` con los objetos completos que recibiste de Typesense.
+3. Cuando confirme una opción (ej. "quiero la opción 2" o mencione el `comp_name`), llama a `retrieve_medicine_with_price_and_store` pasando todos los campos necesarios del `Medication` elegido. Describe los resultados y establece `action="complete"` llenando `results`.
+4. Si necesitas más contexto antes de llamar a los tools (por ejemplo, forma farmacéutica o concentración), haz preguntas aclaratorias y establece `action="clarify_query"`.
+
+Reglas generales:
+- Responde siempre en español neutro.
+- Para consultas de medicamentos incluye un breve resumen y una lista estructurada con {farmacia, dirección, precio}.
+- Para consultas de síntomas enfatiza que la información no sustituye una evaluación presencial y nunca sugieras automedicación.
 """.strip()
 
 
@@ -93,7 +104,7 @@ medicine_agent = PydanticAgent[
 	deps_type=MedicineSearchDependencies,
 	output_type=MedicineAgentReply,
 	instructions=AGENT_INSTRUCTIONS,
-	tools=[retrieve_medicine_names, retrieve_medicine_with_price_and_store],
+	tools=[recommend_specialty, retrieve_medicine_names, retrieve_medicine_with_price_and_store],
 	model_settings=ModelSettings(temperature=TEMPERATURE),
 )
 

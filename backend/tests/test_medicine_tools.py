@@ -3,13 +3,18 @@ from __future__ import annotations
 from types import SimpleNamespace
 import unittest
 
+from services.agent.tools.recommend_specialty import (
+    SPECIALTY_LIST,
+    SpecialtyCatalog,
+    recommend_specialty,
+)
 from services.agent.tools.search_medicine import (
     MedicineSearchConfig,
     MedicineSearchDependencies,
     retrieve_medicine_names,
     retrieve_medicine_with_price_and_store,
 )
-from schemas.meds import Medication
+from schemas.agent_meds import Medication
 
 
 class FakeTypesenseDocuments:
@@ -123,6 +128,25 @@ class MedicineToolsTest(unittest.TestCase):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0].store_name, "MiFarma")
         self.assertAlmostEqual(results[0].price, 4.5)
+
+    def test_recommend_specialty_returns_catalog_for_llm_reasoning(self):
+        ctx = SimpleNamespace(deps=None)
+        concern = "Tengo dolor de estómago y náusea desde ayer"
+        response = recommend_specialty(ctx, concern)
+        self.assertIsInstance(response, SpecialtyCatalog)
+        self.assertIn("estómago", response.concern.lower())
+        specialty_names = [item.name for item in response.specialties]
+        self.assertEqual(len(specialty_names), len(SPECIALTY_LIST))
+        self.assertIn("GASTROENTEROLOGÍA", specialty_names)
+        self.assertIn("MEDICINA GENERAL", specialty_names)
+        self.assertIn("automedicación", response.reminder.lower())
+
+    def test_recommend_specialty_handles_empty_description(self):
+        ctx = SimpleNamespace(deps=None)
+        response = recommend_specialty(ctx, "  ")
+        self.assertIsInstance(response, SpecialtyCatalog)
+        self.assertIn("consulta general", response.concern.lower())
+        self.assertGreater(len(response.specialties), 0)
 
 
 if __name__ == "__main__":  # pragma: no cover
