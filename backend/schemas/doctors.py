@@ -2,10 +2,8 @@ from pydantic import BaseModel
 
 
 class DoctorSearchRequest(BaseModel):
-    id: str | None = None
-    specialty: str | None = None
-    name: str | None = None
-    description: str | None = None
+    name_query: str | None = None
+    speciality: str | None = None
     top_k: int = 10
 
 
