@@ -14,11 +14,15 @@ class DoctorService:
     @staticmethod
     def search_doctors(payload: DoctorQuery) -> DoctorQueryResult:
         #print("Searching doctors with payload:", payload)
+        print("Typesense client:", payload)
         name_query = payload.name
         # speciality = payload.speciality
-        top_k = payload.top_k
+        top_k = payload.top_k or 10
         top_items = []
 
+        if not name_query:
+            name_query = ""
+            return DoctorQueryResult(results=[])
         # search with Typesense
         search_parameters = {
             'q': name_query,
