@@ -1,0 +1,95 @@
+{
+   "COD_IPRESS": "00003373",
+            
+    "ESPECIALIDES": [
+                {
+                    "NOMBRE": "MEDICINA GENERAL",
+                    "CODIGO": "1-0049"
+                },
+                            {
+                "NOMBRE": "NUTRICIÓN",
+                "CODIGO": "1-0065"
+                }
+    ],
+    "CARTERA": [
+                {
+                    "NOMBRE": "Atención en tópico de inyectables y nebulizaciones ",
+                    "CODIGO": 59
+                },
+                {
+                    "NOMBRE": "Visita domiciliaria por profesional de la salud no médico ",
+                    "CODIGO": 164
+                }
+    ],
+    "UPS": [
+                {
+                    "NOMBRE": "SERV.ADM.-CENTRO DE DOCUMENTACIÓN E INFORMACIÓN",
+                    "CODIGO": "010300",
+                    "ESTADO": "ACTIVO"
+                },
+                {
+                "NOMBRE": "DIAGNÓSTICO POR IMÁGENES -ULTRASONIDO/ ECOGRAFÍA-",
+                "CODIGO": "080900",
+                "ESTADO": "ACTIVO"
+                }
+    ],
+
+    "DATOS": [
+                {
+                    "INOPERATIVA": 0,
+                    "PROPIETARIO_RUC": "20171178585",
+                    "ESTABLECIMIENTO_NOMBRE": "C.S SANTIAGO",
+                    "ESTABLECIMIENTO_DIRECCION": "OTROS PANAMERICANA SUR KM. 317 - SANTIAGO DISTRITO SANTIAGO PROVINCIA ICA DEPARTAMENTO ICA ",
+                    "ESTABLECIMIENTO_CORREO": "classant10@hotmail.com",
+                    "ESTABLECIMIENTO_CREACION": "15/08/1962",
+                    "ADICIONAL_GRUPO_OBJETIVO": "POBLACION EN GENERAL",
+                    "MEDICO_NUM_COLEGIATURA": "7118",
+                    "ESTABLECIMIENTO_TIPO": "ESTABLECIMIENTO DE SALUD SIN INTERNAMIENTO",
+                    "MINSA_DIRESA": "DIRESA-ICA",
+                    "PROPIETARIO_TELEFONO": "056-228136",
+                    "ESTABLECIMIENTO_LONGITUD": -75.71266,
+                    "OPERATIVA": 0,
+                    "MINSA_ODSIS": "ICA",
+                    "REPLEGAL_DATOS": "VICTOR MANUEL MONTALVO VASQUEZ N,NDNIN,N41156829",
+                    "CENTRO_POBLADO": "SANTIAGO",
+                    "MEDICO_DATOS": "FELIPE JUAN CARLOS LOPEZ QUIJANDRIA N,NDNIN,N21459096",
+                    "PROPIETARIO_RAZON_SOCIAL": "DIRECCION REGIONAL DE SALUD ICA",
+                    "PROPIETARIO_FAX": "056-234791",
+                    "ADICIONAL_DOC_NOMINTERNO": "CATCRC20200107105643.PDF",
+                    "ESTABLECIMIENTO_INICIO": "15/08/1962",
+                    "SITUACION_CONDICION": "ACTIVO",
+                    "ADICIONAL_DOCUMENTO_DIGITAL": 926466,
+                    "SITUACION_ESTADO": "ACTIVO",
+                    "TI_CONDICION": 3,
+                    "FLAG_OFICIO": 0,
+                    "ESTABLECIMIENTO_ALTITUD": 375.3,
+                    "MINSA_RED": "ICA-PALPA-NAZCA",
+                    "MINSA_CLAS": "SANTIAGO",
+                    "PROPIETARIO_DIRECCION": "PROLONGACIÓN SERVULO GUTIERREZ NUMERO 223 URBANIZACION SAN MIGUEL DISTRITO ICA PROVINCIA ICA DEPARTAMENTO ICA ",
+                    "MEDICO_COLEGIO": "COLEGIO ODONTOLOGICO DEL PERU",
+                    "ESTABLECIMIENTO_TEL_EMER": "056-402449",
+                    "CO_UNIDADEJECUTORA": 1223,
+                    "MINSA_UNIDADEJECUTORA": "1223-RED DE SALUD ICA",
+                    "CAMAS": 10,
+                    "CO_UNICOIPRESS_HISTORICO": "1408820",
+                    "ESTABLECIMIENTO_UBIGEO": "ICAN,NICAN,NSANTIAGO",
+                    "ADICIONAL_NUM_AMBESTAB": 25,
+                    "CO_UNICOIPRESS": "00003373",
+                    "PROPIETARIO_UBIGEO": "ICAN,NICAN,NICA",
+                    "ADICIONAL_CATEGORIA": "I-3",
+                    "ADICIONAL_DOC_NOMORIGINAL": "RDR 2129 SANTIAGO 27.PDF",
+                    "FECHA_CONSULTANTE": "21/01/2020",
+                    "ESTABLECIMIENTO_REGISTRO": "12/12/2008",
+                    "ADICIONAL_HORATENCION": "24 HORAS",
+                    "ESTABLECIMIENTO_LATITUD": -14.19293,
+                    "ESTABLECIMIENTO_TELEFONO": "056-402417",
+                    "ADICIONAL_DOC_FECHA": "27/12/2019",
+                    "PROPIETARIO_CORREO": "info@diresaica.gob.pe",
+                    "ADICIONAL_CATEGORIA_NUMERO": "2129",
+                    "MINSA_MICRORED": "SANTIAGO",
+                    "ADICIONAL_CATEGORIA_TIPO": "RESOLUCIÓN",
+                    "ESTABLECIMIENTO_INSTITUCION": "GOBIERNO REGIONAL",
+                    "PROPIETARIO_PAGINA": "http://www.diresaica.gob.pe"
+                }
+        ],
+}
