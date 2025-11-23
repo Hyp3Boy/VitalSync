@@ -1,10 +1,12 @@
 version: '3.9'
 services:
-  app:
+  backend:
     build: .
-    command: python main.py
+    command: uvicorn api.api:APP --host 0.0.0.0 --port 8000
     working_dir: /app
     volumes:
       - .:/app
     ports:
       - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
