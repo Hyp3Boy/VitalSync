@@ -12,7 +12,7 @@ class HealthCenter(BaseModel):
 
 class HealthCenterQuery(BaseModel):
     name: str | None = None
-    description: str | None = None
+    specialty: str | None = None
     location: list[float] | None = None
     max_radius: int | None = 10
     

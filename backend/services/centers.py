@@ -14,9 +14,9 @@ class CenterService:
         Search health centers using Typesense, combining geographical proximity
         with text-based search for name and description.
         """
-        name_query = payload.name
+        name= payload.name
         ubication = payload.location
-        description = payload.description
+        specialty = payload.specialty
         max_radius = payload.max_radius if payload.max_radius is not None else 10  # Default to 10km
         top_k = 15  # default value for results per page
 
@@ -28,31 +28,31 @@ class CenterService:
         text_queries_parts = []
         query_by_fields_parts = []
 
-        if name_query:
-            text_queries_parts.append(name_query)
-            query_by_fields_parts.append('nombre_completo')
+        if name:
+            text_queries_parts.append(name)
+            query_by_fields_parts.append('nombre')
 
-        if description:
-            text_queries_parts.append(description)
-            query_by_fields_parts.append('descripcion')
+        if specialty:
+            text_queries_parts.append(specialty)
+            query_by_fields_parts.append('especialidades')
 
         if text_queries_parts:
             search_parameters['q'] = ' '.join(text_queries_parts)
             search_parameters['query_by'] = ','.join(query_by_fields_parts)
         else:
             search_parameters['q'] = '*'
-            search_parameters['query_by'] = 'nombre_completo'
+            search_parameters['query_by'] = 'nombre'
 
         if ubication and len(ubication) == 2:
             lat, lon = ubication[0], ubication[1]
-            geo_filter = f'ubicacion_geopoint:({lat}, {lon}, {max_radius} km)'
+            geo_filter = f'ubicacion:({lat}, {lon}, {max_radius} km)'
 
             if 'filter_by' in search_parameters:
                 search_parameters['filter_by'] += f' && {geo_filter}'
             else:
                 search_parameters['filter_by'] = geo_filter
 
-            search_parameters['sort_by'] = f'ubicacion_geopoint:({lat}, {lon}):asc'
+            search_parameters['sort_by'] = f'ubicacion({lat}, {lon}):asc'
         #print(f"Final Typesense search parameters: {search_parameters}")
         try:
             search_results = client.collections[COLLECTION_CENTERS].documents.search(
