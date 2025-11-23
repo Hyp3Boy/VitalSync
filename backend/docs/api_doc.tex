@@ -1,0 +1,227 @@
+\documentclass[12pt]{article}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[table]{xcolor}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{tcolorbox}
+\usepackage{geometry}
+\usepackage{enumitem}
+
+% --- CONFIGURACIÓN DE PÁGINA ---
+\geometry{margin=1.5cm} % Márgenes un poco más estrechos para que quepa el código
+
+% --- COLORES DE TEMA ---
+\definecolor{AuthBlue}{HTML}{1F77B4}
+\definecolor{CentersTeal}{HTML}{17BEBB}
+\definecolor{DoctorsOrange}{HTML}{FF9F1C}
+\definecolor{MedsPurple}{HTML}{6C5B7B}
+\definecolor{AgentGreen}{HTML}{2CA58D}
+
+% --- COLORES DE SYNTAX JSON ---
+\definecolor{JsonKeys}{HTML}{795E26} % Marrón/Dorado oscuro tipo VS Code
+\definecolor{JsonTypes}{HTML}{0451A5} % Azul oscuro para tipos
+\definecolor{JsonPunct}{HTML}{333333} % Gris oscuro para llaves
+
+% --- COMANDOS PERSONALIZADOS PARA JSON ---
+% \jsonkey{nombre_campo} -> Imprime "nombre_campo": 
+\newcommand{\jsonkey}[1]{\textcolor{JsonKeys}{\textbf{\texttt{#1}}}\textcolor{JsonPunct}{\texttt{:}}\ }
+
+% \jsontype{Tipo} -> Imprime Tipo en azul y salta línea
+\newcommand{\jsontype}[1]{\textcolor{JsonTypes}{\texttt{#1}}\newline}
+
+% \jsonentry{campo}{tipo} -> Combina los dos anteriores
+\newcommand{\jsonentry}[2]{\noindent\jsonkey{#1}\jsontype{#2}}
+
+% \jsonentryopt{campo}{tipo} -> Campo opcional con ?
+\newcommand{\jsonentryopt}[2]{\noindent\jsonkey{#1?}\jsontype{#2}}
+
+% Indentación para objetos anidados
+\newcommand{\indentone}{\hspace*{1.5em}}
+\newcommand{\indenttwo}{\hspace*{3.0em}}
+
+% Configuración de tablas
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\renewcommand{\arraystretch}{1.4} 
+\tcbset{colbacktitle=white,fonttitle=\bfseries,boxrule=0.6pt}
+
+\title{\textbf{VitalSync API Documentation}}
+\author{Especificación de Contratos de Datos}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Autenticación (\texttt{/auth})}
+\begin{tcolorbox}[title={/auth},colframe=AuthBlue!80!black,colback=AuthBlue!3]
+\small
+\begin{tabularx}{\textwidth}{>{\hsize=0.6\hsize}Y >{\hsize=0.4\hsize}Y Y Y}
+\rowcolor{AuthBlue!18}\textbf{Ruta} & \textbf{Método} & \textbf{Payload (Recibe)} & \textbf{Response (Retorna)} \\\midrule
+
+/login & \textbf{POST} & 
+\jsonentry{email}{EmailStr}
+\jsonentry{password}{String}
+& 
+\jsonentry{token}{String}
+\jsonentry{expiresIn}{Int}
+\\\addlinespace[0.5em]
+
+/register & \textbf{POST} & 
+\jsonentry{username}{String}
+\jsonentry{password}{String}
+& 
+\jsonentry{status}{String}
+\jsonentry{id}{Int}
+\\\addlinespace[0.5em]
+
+/me & \textbf{GET} & 
+\textit{Headers:}\newline
+\texttt{Authorization: Bearer <token>}
+& 
+\jsonentry{id}{String}
+\jsonentry{email}{EmailStr}
+\jsonentry{role}{String}
+\end{tabularx}
+\normalsize
+\end{tcolorbox}
+
+
+\section{Centros de Salud (\texttt{/centers})}
+\begin{tcolorbox}[title={/centers},colframe=CentersTeal!80!black,colback=CentersTeal!4]
+\small
+\begin{tabularx}{\textwidth}{>{\hsize=0.6\hsize}Y >{\hsize=0.4\hsize}Y Y Y}
+\rowcolor{CentersTeal!18}\textbf{Ruta} & \textbf{Método} & \textbf{Payload (Recibe)} & \textbf{Response (Retorna)} \\\midrule
+
+/search & \textbf{POST} & 
+\jsonentryopt{name}{String}
+\jsonentryopt{specialty}{String}
+\jsonentryopt{location}{[Lat, Lon]}
+\jsonentryopt{max\_radius}{Int (km)}
+& 
+\jsonkey{centers}\jsontype{[}
+\indentone\jsonkey{id}\jsontype{String}
+\indentone\jsonkey{name}\jsontype{String}
+\indentone\jsonkey{ubication}\jsontype{[Lat, Lon]}
+\indentone\jsonkey{specialties}\jsontype{[String]}
+\indentone\jsonkey{category}\jsontype{Int}
+\textcolor{JsonPunct}{\texttt{]}}
+\\\addlinespace[0.5em]
+
+/about & \textbf{GET} & 
+\textit{Query Params:}\newline
+\jsonentry{id}{String}
+& 
+\jsonkey{Object}\jsontype{\{}
+\indentone\textit{(Mismos campos que en search)}
+\textcolor{JsonPunct}{\texttt{\}}}
+\end{tabularx}
+\normalsize
+\end{tcolorbox}
+
+
+\section{Doctores (\texttt{/doctors})}
+\begin{tcolorbox}[title={/doctors},colframe=DoctorsOrange!80!black,colback=DoctorsOrange!5]
+\small
+\begin{tabularx}{\textwidth}{>{\hsize=0.6\hsize}Y >{\hsize=0.4\hsize}Y Y Y}
+\rowcolor{DoctorsOrange!20}\textbf{Ruta} & \textbf{Método} & \textbf{Payload (Recibe)} & \textbf{Response (Retorna)} \\\midrule
+
+/search & \textbf{POST} & 
+\jsonentryopt{name}{String}
+\jsonentryopt{specialty}{String}
+\jsonentryopt{top\_k}{Int}
+& 
+\jsonkey{results}\jsontype{[}
+\indentone\jsonkey{id}\jsontype{String}
+\indentone\jsonkey{cmp}\jsontype{String}
+\indentone\jsonkey{name}\jsontype{String}
+\indentone\jsonkey{specialties}\jsontype{[String]}
+\indentone\jsonkey{n\_comments}\jsontype{Int}
+\indentone\jsonkey{sc\_acum}\jsontype{Float}
+\textcolor{JsonPunct}{\texttt{]}}
+\\\addlinespace[0.5em]
+
+/about & \textbf{GET} & 
+\textit{Query Params:}\newline
+\jsonentry{id}{String}
+& 
+\jsonkey{Object}\jsontype{\{}
+\indentone\textit{(Mismos campos que en search)}
+\textcolor{JsonPunct}{\texttt{\}}}
+\\\addlinespace[0.5em]
+
+/comment & \textbf{PUT} & 
+\jsonentry{doctor\_id}{String}
+\jsonentry{user\_id}{String}
+\jsonentry{rating}{Float}
+\jsonentry{content}{String}
+& 
+\textit{Comment added successfully.}
+\end{tabularx}
+\normalsize
+\end{tcolorbox}
+
+
+\section{Medicamentos (\texttt{/meds})}
+\begin{tcolorbox}[title={/meds},colframe=MedsPurple!80!black,colback=MedsPurple!5]
+\small
+\begin{tabularx}{\textwidth}{>{\hsize=0.6\hsize}Y >{\hsize=0.4\hsize}Y Y Y}
+\rowcolor{MedsPurple!20}\textbf{Ruta} & \textbf{Método} & \textbf{Payload (Recibe)} & \textbf{Response (Retorna)} \\\midrule
+
+/search & \textbf{POST} & 
+\jsonentry{query}{String}
+\jsonentryopt{per\_page}{Int (Def: 10)}
+& 
+\jsonkey{results}\jsontype{[}
+\indentone\jsonkey{id}\jsontype{B64String}
+\indentone\jsonkey{name}\jsontype{String}
+\indentone\jsonkey{comp\_name}\jsontype{String}
+\indentone\jsonkey{concentration}\jsontype{String}
+\textcolor{JsonPunct}{\texttt{]}}
+\\\addlinespace[0.5em]
+
+/about\newline/\{id\} & \textbf{GET} & 
+\textit{Path Param:}\newline
+\jsonentry{id}{B64String}
+& 
+\jsonkey{medication}\jsontype{\{Object\}}
+\jsonkey{stores}\jsontype{[}
+\indentone\jsonkey{price}\jsontype{Float}
+\indentone\jsonkey{store\_name}\jsontype{String}
+\indentone\jsonkey{address}\jsontype{String}
+\indentone\jsonkey{phone}\jsontype{String}
+\textcolor{JsonPunct}{\texttt{]}}
+\end{tabularx}
+\normalsize
+\end{tcolorbox}
+
+
+\section{Agente IA (\texttt{/agent/medicine})}
+\begin{tcolorbox}[title={/agent},colframe=AgentGreen!80!black,colback=AgentGreen!4]
+\small
+\begin{tabularx}{\textwidth}{>{\hsize=0.6\hsize}Y >{\hsize=0.4\hsize}Y Y Y}
+\rowcolor{AgentGreen!20}\textbf{Ruta} & \textbf{Método} & \textbf{Payload (Recibe)} & \textbf{Response (Retorna)} \\\midrule
+
+/run & \textbf{POST} & 
+\jsonentry{message}{String}
+\jsonentryopt{thread\_id}{String}
+& 
+\jsonkey{thread\_id}\jsontype{String}
+\jsonkey{interrupted}\jsontype{Bool}
+\jsonkey{reply}\jsontype{\{}
+\indentone\jsonkey{action}\jsontype{Enum}
+\indentone\jsonkey{text}\jsontype{String}
+\indentone\jsonkey{candidates}\jsontype{[Medication]}
+\indentone\jsonkey{results}\jsontype{[Store]}
+\textcolor{JsonPunct}{\texttt{\}}}
+\\\addlinespace[0.5em]
+
+/resume & \textbf{POST} & 
+\jsonentry{thread\_id}{String}
+\jsonentry{resume\_val}{Any}
+& 
+\textit{(Misma estructura que /run)}
+\end{tabularx}
+\normalsize
+\end{tcolorbox}
+
+\end{document}
