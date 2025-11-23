@@ -1,61 +1,42 @@
 from pydantic import BaseModel
 
-
-class DoctorSearchRequest(BaseModel):
-    name_query: str | None = None
-    speciality: str | None = None
-    top_k: int = 10
-
-
-class DoctorSummary(BaseModel):
+# BASE MODELS
+class Doctor(BaseModel):
     id: str
+    cmp: str
+    status: str
     name: str
-    speciality: str
-    rating: int
-    workplace: str
-    workplace_insurance: str
+    specialties: list[str]
+    n_comments: int
+    sc_acum: float
 
 
-class DoctorsListResponse(BaseModel):
-    code: int
-    data: list[DoctorSummary]
-
-
-class DoctorScheduleBlock(BaseModel):
-    day: str
-    start_time: str
-    end_time: str
-
-
-class DoctorDetail(BaseModel):
-    id: str
-    name: str
-    speciality: str
-    rating: int
-    workplace: str
-    workplace_insurance: str
-    bio: str
-    contact_info: str
-    schedule: list[DoctorScheduleBlock]
-
-
-class DoctorDetailResponse(BaseModel):
-    code: int
-    data: DoctorDetail
-
-
-class DoctorCommentRequest(BaseModel):
+class Comment(BaseModel):
     doctor_id: str
     user_id: str
-    rating: int
-    comment: str
+    rating: float
+    content: str
+    timestamp: str
+
+# ROUTE MODELS
 
 
-class DoctorCommentResponse(BaseModel):
-    code: int
-    message: str
+class IdDoctorQuery(BaseModel):
+    id: str
+    
+class DoctorQuery(BaseModel):
+    name: str | None = None
+    specialty: str | None = None
+    top_k: int | None = 10 
 
+class DoctorQueryResult(BaseModel):
+    results: list[Doctor] = []
 
-class DoctorCommentListResponse(BaseModel):
+class CommentRequest(BaseModel):
     doctor_id: str
-    comments: list[DoctorCommentRequest]
+    user_id: str
+    rating: float
+    content: str
+
+class CommentResult(BaseModel):
+    comments: list[Comment] = []

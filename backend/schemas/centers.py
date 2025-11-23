@@ -1,37 +1,23 @@
 from pydantic import BaseModel
 
 
-class LocationFilter(BaseModel):
-    latitude: float
-    longitude: float
+# BASE MODELS
+class HealthCenter(BaseModel):
+    id : str
+    name : str
+    ubication : list[float]  # [latitude, longitude]
+    specialties : list[str]
+    category : str
+    ubigeo : str
 
-
-class CenterSearchRequest(BaseModel):
+class HealthCenterQuery(BaseModel):
     name: str | None = None
     description: str | None = None
-    location: LocationFilter | None = None
-    top_k: int = 10
-
-
-class CenterSummary(BaseModel):
+    location: list[float] | None = None
+    max_radius: int | None = 10
+    
+class HealthCentersQueryResult(BaseModel):
+    centers: list[HealthCenter] = []
+    
+class IdHealthCenter(BaseModel):
     id: str
-    name: str
-    location: str
-
-
-class CentersListResponse(BaseModel):
-    code: int
-    data: list[CenterSummary]
-
-
-class CenterDetail(BaseModel):
-    id: str
-    name: str
-    location: str
-    services_offered: str
-    contact_info: str
-
-
-class CenterDetailResponse(BaseModel):
-    code: int
-    data: CenterDetail
