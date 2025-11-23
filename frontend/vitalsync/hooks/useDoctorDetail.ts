@@ -15,6 +15,9 @@ export const useDoctorDetail = (doctorId: string) => {
     queryKey: ['doctor-detail', doctorId],
     queryFn: () => fetchDoctorDetail(doctorId),
     staleTime: 1000 * 60 * 5,
+    onError: () => {
+      toast.error('No pudimos cargar la información de este doctor.')
+    },
   });
 
   const mutation = useMutation({

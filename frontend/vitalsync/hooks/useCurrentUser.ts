@@ -9,6 +9,7 @@ export const useCurrentUser = () => {
   const user = useAuthStore((state) => state.user);
   const status = useAuthStore((state) => state.status);
   const { setUser, setStatus, setError } = useAuthStore((state) => state.actions);
+  const shouldFetchProfile = Boolean(user);
 
   const query = useQuery({
     queryKey: ['current-user'],
@@ -16,6 +17,7 @@ export const useCurrentUser = () => {
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false,
+    enabled: shouldFetchProfile,
   });
 
   useEffect(() => {

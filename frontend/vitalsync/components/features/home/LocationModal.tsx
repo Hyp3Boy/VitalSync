@@ -1,6 +1,10 @@
 'use client';
 
+import MapboxMap, {
+  MapboxMapHandle,
+} from '@/components/features/location/MapboxMap';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import {
   Command,
   CommandEmpty,
@@ -19,34 +23,44 @@ import {
 import { useDebounce } from '@/hooks/useDebounce';
 import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 import { locationSchema } from '@/lib/validations/location';
+import {
+  reverseGeocode,
+  searchLocations,
+  type MapboxGeocodeResult,
+} from '@/services/mapboxService';
 import { LocationData, useLocationStore } from '@/store/useLocationStore';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2, MapPin, Target } from 'lucide-react';
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import Link from 'next/link';
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
-import Link from 'next/link';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { toast } from 'sonner';
 
-// Mock data (en un caso real, vendría de una API)
-const mockAddresses = [
-  'Av. Arequipa 520, Lima 15046',
-  'Calle Schell 310, Miraflores 15074',
-  'Jirón de la Unión 899, Lima 15001',
-  'Av. Angamos Este 2500, Surquillo 15038',
-];
+const DEFAULT_VIEW_STATE = {
+  latitude: -12.046374,
+  longitude: -77.042793,
+  zoom: 11,
+};
 
-// --- Componente del formulario de búsqueda ---
-const LocationSearchForm = () => {
+const LocationSearchForm = ({
+  onLocationSaved,
+}: {
+  onLocationSaved?: () => void;
+}) => {
   const { setLocation } = useLocationStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [isCommandListVisible, setCommandListVisible] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<MapboxGeocodeResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [selectedSuggestion, setSelectedSuggestion] =
+    useState<MapboxGeocodeResult | null>(null);
+  const mapRef = useRef<MapboxMapHandle | null>(null);
+  const mapPickController = useRef<AbortController | null>(null);
 
-  // Aplicamos el debounce al término de búsqueda
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const debouncedSearchTerm = useDebounce(searchTerm, 350);
   const commandRef = useRef<HTMLDivElement | null>(null);
 
   const form = useForm<z.infer<typeof locationSchema>>({
@@ -59,64 +73,152 @@ const LocationSearchForm = () => {
   );
 
   useEffect(() => {
-    let isCancelled = false;
+    if (!selectedSuggestion) return;
+    mapRef.current?.flyTo({
+      latitude: selectedSuggestion.coordinates.latitude,
+      longitude: selectedSuggestion.coordinates.longitude,
+      zoom: 15,
+    });
+  }, [selectedSuggestion]);
 
-    if (!debouncedSearchTerm) {
-      setSuggestions([]);
-      setIsSearching(false);
-      setCommandListVisible(false);
-      return;
+  useEffect(() => {
+    if (!debouncedSearchTerm || debouncedSearchTerm.trim().length < 3) {
+      const frame = requestAnimationFrame(() => {
+        setSuggestions([]);
+        setSearchError(null);
+        setIsSearching(false);
+      });
+      return () => cancelAnimationFrame(frame);
     }
 
-    setIsSearching(true);
+    const controller = new AbortController();
+    const frame = requestAnimationFrame(() => {
+      setIsSearching(true);
+      setSearchError(null);
+    });
 
-    const handler = setTimeout(() => {
-      if (isCancelled) return;
-      const filtered = mockAddresses.filter((addr) =>
-        addr.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      );
-      setSuggestions(filtered);
-      setIsSearching(false);
-    }, 200);
+    searchLocations(debouncedSearchTerm, {
+      signal: controller.signal,
+      limit: 6,
+    })
+      .then((results) => {
+        setSuggestions(results);
+        if (results.length === 0) {
+          setSearchError(
+            'No encontramos coincidencias. Intenta con otra dirección.'
+          );
+        }
+      })
+      .catch((error) => {
+        if (error.name === 'AbortError') return;
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'No pudimos buscar la dirección. Intenta nuevamente.';
+        setSearchError(message);
+        toast.error(message);
+      })
+      .finally(() => {
+        setIsSearching(false);
+      });
 
     return () => {
-      isCancelled = true;
-      clearTimeout(handler);
+      cancelAnimationFrame(frame);
+      controller.abort();
     };
   }, [debouncedSearchTerm]);
 
-  const handleSuggestionSelect = (address: string) => {
-    const parts = address.split(',');
-    const postalCodeMatch = address.match(/\d{5}/);
-
-    form.setValue('address', address, { shouldValidate: true });
-
-    if (parts.length > 1) {
-      const city = parts[1].trim().split(' ')[0];
-      form.setValue('city', city ?? '', { shouldValidate: true });
+  const applySuggestionToForm = (suggestion: MapboxGeocodeResult) => {
+    form.setValue('address', suggestion.addressLine, { shouldValidate: true });
+    form.setValue('city', suggestion.city ?? '', { shouldValidate: true });
+    if (suggestion.postalCode) {
+      form.setValue('postalCode', suggestion.postalCode, {
+        shouldValidate: true,
+      });
     }
-    if (postalCodeMatch) {
-      form.setValue('postalCode', postalCodeMatch[0], { shouldValidate: true });
-    }
+  };
 
-    setSearchTerm(address);
+  const handleSuggestionSelect = (suggestion: MapboxGeocodeResult) => {
+    applySuggestionToForm(suggestion);
+    setSelectedSuggestion(suggestion);
+    setSearchTerm(suggestion.addressLine);
     setCommandListVisible(false);
   };
 
   function onSubmit(values: z.infer<typeof locationSchema>) {
-    console.log('Formulario enviado:', values);
-    setLocation(values as LocationData);
+    const payload: LocationData = {
+      ...values,
+      latitude: selectedSuggestion?.coordinates.latitude,
+      longitude: selectedSuggestion?.coordinates.longitude,
+    };
+    setLocation(payload);
     form.reset();
+    setSearchTerm('');
+    setSelectedSuggestion(null);
+    onLocationSaved?.();
   }
+
+  const markers = useMemo(() => {
+    if (!selectedSuggestion) return [];
+    return [
+      {
+        id: selectedSuggestion.id,
+        latitude: selectedSuggestion.coordinates.latitude,
+        longitude: selectedSuggestion.coordinates.longitude,
+        label: selectedSuggestion.label,
+      },
+    ];
+  }, [selectedSuggestion]);
+
+  const handleMapClick = async ({
+    latitude,
+    longitude,
+  }: {
+    latitude: number;
+    longitude: number;
+  }) => {
+    mapPickController.current?.abort();
+    const controller = new AbortController();
+    mapPickController.current = controller;
+    setIsSearching(true);
+    setSearchError(null);
+
+    try {
+      const result = await reverseGeocode(
+        { latitude, longitude },
+        { signal: controller.signal }
+      );
+      if (!result) {
+        const message = 'No pudimos encontrar una dirección para ese punto.';
+        setSearchError(message);
+        toast.error(message);
+        setSelectedSuggestion(null);
+        return;
+      }
+      applySuggestionToForm(result);
+      setSelectedSuggestion(result);
+      setSearchTerm(result.addressLine);
+    } catch (error) {
+      if ((error as Error).name === 'AbortError') return;
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'No pudimos convertir ese punto en una dirección.';
+      setSearchError(message);
+      toast.error(message);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="address"
           render={({ field }) => (
-            <FormItem className="h-12 border-2 border-border-muted rounded-md">
+            <FormItem className="rounded-xl border-2 border-border-muted h-12">
               <FormControl>
                 <div ref={commandRef} className="relative">
                   <Command>
@@ -156,24 +258,27 @@ const LocationSearchForm = () => {
                                 </div>
                               ) : suggestions.length === 0 ? (
                                 <CommandEmpty>
-                                  No se encontraron resultados.
+                                  {searchError ??
+                                    'No se encontraron resultados.'}
                                 </CommandEmpty>
                               ) : (
                                 <CommandGroup heading="Coincidencias sugeridas">
-                                  {suggestions.map((s) => (
+                                  {suggestions.map((suggestion, index) => (
                                     <CommandItem
-                                      key={s}
-                                      value={s}
-                                      onSelect={handleSuggestionSelect}
+                                      key={`${suggestion.id}-${index}`}
+                                      value={suggestion.addressLine}
+                                      onSelect={() =>
+                                        handleSuggestionSelect(suggestion)
+                                      }
                                       className="cursor-pointer text-left"
                                     >
                                       <MapPin className="mr-3 h-4 w-4 text-muted-foreground" />
                                       <div className="flex flex-col">
                                         <span className="text-sm font-medium text-foreground">
-                                          {s.split(',')[0]}
+                                          {suggestion.label}
                                         </span>
                                         <span className="text-xs text-muted-foreground">
-                                          {s}
+                                          {suggestion.addressLine}
                                         </span>
                                       </div>
                                     </CommandItem>
@@ -188,95 +293,191 @@ const LocationSearchForm = () => {
                 </div>
               </FormControl>
               <FormMessage />
+              {searchError && (
+                <p className="px-4 pb-1 text-xs text-destructive">
+                  {searchError}
+                </p>
+              )}
             </FormItem>
           )}
         />
 
+        <FormField
+          control={form.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem className="rounded-xl border-2 border-border-muted h-12">
+              <FormControl>
+                <input
+                  {...field}
+                  placeholder="Ciudad"
+                  className="w-full bg-transparent px-4 text-base placeholder:text-muted-foreground h-full rounded-xl focus-visible:ring-border-muted focus-visible:ring-2 focus-visible:box-shadow-none border-0"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="postalCode"
+          render={({ field }) => (
+            <FormItem className="rounded-xl border-2 border-border-muted h-12">
+              <FormControl>
+                <input
+                  {...field}
+                  placeholder="Código postal"
+                  className="w-full bg-transparent px-4 text-base placeholder:text-muted-foreground h-full rounded-xl focus-visible:ring-border-muted focus-visible:ring-2 focus-visible:box-shadow-none border-0"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <MapboxMap
+          ref={mapRef}
+          initialViewState={
+            selectedSuggestion
+              ? {
+                  latitude: selectedSuggestion.coordinates.latitude,
+                  longitude: selectedSuggestion.coordinates.longitude,
+                  zoom: 14,
+                }
+              : DEFAULT_VIEW_STATE
+          }
+          markers={markers}
+          className="h-64 w-full rounded-xl"
+          onMapClick={handleMapClick}
+        />
+
         <Button type="submit" size="lg" className="w-full text-lg">
-          Continuar
+          Guardar ubicación
         </Button>
       </form>
     </Form>
   );
 };
 
-// --- Componente Principal del Modal ---
 export default function LocationModal({
   isAuthenticated,
+  onLocationSaved,
+  variant = 'full',
 }: {
   isAuthenticated: boolean;
+  onLocationSaved?: () => void;
+  variant?: 'full' | 'compact';
 }) {
   const { detectAndSetLocation, isLoading, error } = useLocationStore();
+  const currentLocation = useLocationStore((state) => state.location);
+  const [awaitingDetectResult, setAwaitingDetectResult] = useState(false);
+  const isCompact = variant === 'compact';
+
+  useEffect(() => {
+    if (!onLocationSaved) return;
+    if (!awaitingDetectResult) return;
+    if (currentLocation) {
+      onLocationSaved();
+      setAwaitingDetectResult(false);
+    }
+  }, [awaitingDetectResult, currentLocation, onLocationSaved]);
+
+  useEffect(() => {
+    if (!awaitingDetectResult) return;
+    if (!error) return;
+    setAwaitingDetectResult(false);
+  }, [awaitingDetectResult, error]);
+
+  const handleDetectLocation = () => {
+    setAwaitingDetectResult(true);
+    detectAndSetLocation();
+  };
 
   return (
-    <section className="w-full max-w-xl space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="text-4xl font-black text-[#5b3d2b]">Bienvenido</h1>
-        <p className="text-base text-[#856d5d]">
-          Por favor, indícanos tu ubicación para continuar.
-        </p>
-      </div>
+    <section className="w-full max-w-2xl space-y-6">
+      {!isCompact && (
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-black">Bienvenido</h1>
+          <p className="text-base">
+            Detecta tu ubicación automáticamente o búscala en el mapa para
+            comenzar.
+          </p>
+        </div>
+      )}
 
-      <div className="rounded-3xl border border-border bg-card p-8 shadow-xl">
-        <Button
-          size="lg"
-          className="mb-6 h-12 w-full rounded-2xl bg-[#4d7757] text-white text-base hover:bg-[#43684c]"
-          onClick={detectAndSetLocation}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-          ) : (
-            <Target className="mr-2 h-5 w-5" />
-          )}
-          Detectar mi Ubicación
-        </Button>
+      <div
+        className={cn(
+          'rounded-3xl border border-border bg-card p-8 shadow-xl',
+          isCompact && 'border-transparent shadow-none'
+        )}
+      >
+        {!isCompact && (
+          <>
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full text-lg"
+              onClick={handleDetectLocation}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <Target className="mr-2 h-5 w-5" />
+              )}
+              Detectar mi Ubicación
+            </Button>
 
-        {error && (
-          <p className="mb-4 text-center text-sm text-destructive">{error}</p>
+            {error && (
+              <p className="mt-4 text-center text-sm text-destructive">{error}</p>
+            )}
+
+            <div className="relative flex items-center py-5 text-sm text-muted-foreground">
+              <div className="grow border-t border-border" />
+              <span className="mx-4">o</span>
+              <div className="grow border-t border-border" />
+            </div>
+          </>
         )}
 
-        <div className="relative flex items-center py-5 text-sm text-muted-foreground">
-          <div className="grow border-t border-border" />
-          <span className="mx-4">o</span>
-          <div className="grow border-t border-border" />
-        </div>
-
         <div className="mb-6 text-center space-y-1">
-          <p className="text-lg font-bold">Ingresar ubicación manualmente</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xl font-bold">Buscar en el mapa</p>
+          <p className="text-base text-muted-foreground">
             Completa tu dirección para personalizar tu experiencia.
           </p>
         </div>
 
-        <LocationSearchForm />
+        <LocationSearchForm onLocationSaved={onLocationSaved} />
       </div>
 
-      <div className="rounded-2xl bg-[#efe8df] px-4 py-3 text-center text-sm text-[#5c3d2a]">
-        Para guardar direcciones,{' '}
-        {isAuthenticated ? (
-          <span className="font-semibold text-primary">
-            ya estás autenticado.
-          </span>
-        ) : (
-          <>
-            <Link
-              href="/login"
-              className="font-semibold text-primary underline-offset-2 hover:underline"
-            >
-              ingresa
-            </Link>{' '}
-            o{' '}
-            <Link
-              href="/register"
-              className="font-semibold text-primary underline-offset-2 hover:underline"
-            >
-              crea una cuenta
-            </Link>
-            .
-          </>
-        )}
-      </div>
+      {!isCompact && (
+        <div className="rounded-2xl bg-[#efe8df] px-4 py-3 text-center text-sm text-[#5c3d2a]">
+          Para guardar direcciones,{' '}
+          {isAuthenticated ? (
+            <span className="font-semibold text-primary">
+              ya estás autenticado.
+            </span>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="font-semibold text-primary underline-offset-2 hover:underline"
+              >
+                ingresa
+              </Link>{' '}
+              o{' '}
+              <Link
+                href="/login"
+                className="font-semibold text-primary underline-offset-2 hover:underline"
+              >
+                crea una cuenta
+              </Link>
+              .
+            </>
+          )}
+        </div>
+      )}
     </section>
   );
 }

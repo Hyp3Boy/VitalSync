@@ -48,9 +48,10 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-error: var(--destructive);
 
   /* --- Fuentes --- */
-  --font-sans: 'Lexend', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
 
   /* --- Texto y Neutros --- */

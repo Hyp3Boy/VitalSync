@@ -1,6 +1,7 @@
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,10 +9,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useAuthStore } from '@/store/useAuthStore';
 import { LogOut, RefreshCw } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const LoadingPill = () => (
   <div className="size-11 rounded-full bg-muted/60 animate-pulse" />
@@ -20,6 +21,7 @@ const LoadingPill = () => (
 export default function UserMenu() {
   const { user, status, query } = useCurrentUser();
   const logout = useAuthStore((state) => state.actions.logout);
+  const router = useRouter();
 
   if (status === 'error' && !user) {
     return (
@@ -51,13 +53,18 @@ export default function UserMenu() {
 
   const handleLogout = async () => {
     await logout();
-    await query.refetch();
+    router.push('/');
+    router.refresh();
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative size-11 rounded-full">
+        <Button
+          variant="ghost"
+          className="relative size-11 rounded-full hover:bg-muted/50
+          text-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        >
           <Avatar className="size-11 ring-1 ring-border/60">
             <AvatarImage src={avatarUrl} alt={name} />
             <AvatarFallback>{userInitials}</AvatarFallback>

@@ -34,9 +34,7 @@ const actions = [
 export default function QuickActions() {
   return (
     <section>
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">
-        Acciones Rápidas
-      </h2>
+      <h2 className="text-2xl font-black mb-4">Acciones Rápidas</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {actions.map(({ title, desc, Icon, href, special }) => {
           const isEmergency = !!special;
@@ -61,8 +59,8 @@ export default function QuickActions() {
                       <Icon className="w-8 h-8" />
                     )}
                   </div>
-                  <h3 className="font-bold text-gray-800">{title}</h3>
-                  <p className="text-sm text-gray-500">{desc}</p>
+                  <h3 className="font-bold">{title}</h3>
+                  <p className="text-sm">{desc}</p>
                 </CardContent>
               </Card>
             </Link>

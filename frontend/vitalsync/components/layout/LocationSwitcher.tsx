@@ -24,6 +24,8 @@ import {
 import { useMemo, useState } from 'react';
 import { NewLocationDialog } from '@/components/features/location/NewLocationDialog';
 import { ManageLocationsDialog } from '@/components/features/location/ManageLocationsDialog';
+import LocationModal from '@/components/features/home/LocationModal';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 
 const locationTagIcon = (tag: string) => {
   switch (tag) {
@@ -53,12 +55,10 @@ export const LocationSwitcher = () => {
   const detectLocation = useLocationStore(
     (state) => state.detectAndSetLocation
   );
-  const openLocationModal = useLocationStore(
-    (state) => state.openLocationModal
-  );
   const manualLocation = useLocationStore((state) => state.location);
   const [isNewDialogOpen, setNewDialogOpen] = useState(false);
   const [isManageDialogOpen, setManageDialogOpen] = useState(false);
+  const [isLocationPickerOpen, setLocationPickerOpen] = useState(false);
 
   const currentLabel = useMemo(() => {
     if (manualLocation?.address) return manualLocation.address;
@@ -74,6 +74,8 @@ export const LocationSwitcher = () => {
       address: location.addressLine,
       city: '',
       postalCode: '',
+      latitude: location.latitude,
+      longitude: location.longitude,
     });
   };
 
@@ -92,13 +94,19 @@ export const LocationSwitcher = () => {
         <DropdownMenuContent className="w-72 p-2" align="start">
           <DropdownMenuItem
             className="flex items-center gap-2 rounded-lg"
-            onSelect={(event) => {
-              event.preventDefault();
+            onSelect={() => {
               detectLocation();
             }}
           >
             <Navigation className="size-4 text-primary" />
             Detectar mi ubicación
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            className="flex items-center gap-2"
+            onSelect={() => setLocationPickerOpen(true)}
+          >
+            <Plus className="size-4" /> Ingresar nueva dirección
           </DropdownMenuItem>
 
           {isAuthenticated ? (
@@ -114,8 +122,7 @@ export const LocationSwitcher = () => {
               {savedLocations.map((location) => (
                 <DropdownMenuItem
                   key={location.id}
-                  onSelect={(event) => {
-                    event.preventDefault();
+                  onSelect={() => {
                     handleSelectLocation(location.id);
                   }}
                   className="flex items-start gap-3 hover:bg-primary/10"
@@ -135,18 +142,16 @@ export const LocationSwitcher = () => {
               ))}
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onSelect={(event) => {
-                  event.preventDefault();
+                onSelect={() => {
                   setNewDialogOpen(true);
                 }}
                 className="flex items-center gap-2"
               >
-                <Plus className="size-4" /> Ingresar nueva dirección
+                <Plus className="size-4" /> Guardar en mi cuenta
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="flex items-center gap-2"
-                onSelect={(event) => {
-                  event.preventDefault();
+                onSelect={() => {
                   setManageDialogOpen(true);
                 }}
               >
@@ -155,15 +160,6 @@ export const LocationSwitcher = () => {
             </>
           ) : (
             <>
-              <DropdownMenuItem
-                onSelect={(event) => {
-                  event.preventDefault();
-                  openLocationModal();
-                }}
-                className="mt-2 flex items-center gap-2"
-              >
-                <Plus className="size-4" /> Ingresar nueva dirección
-              </DropdownMenuItem>
               <div className="space-y-1 px-2 py-3 text-xs text-muted-foreground">
                 <p>Detecta tu ubicación o ingresa una nueva dirección.</p>
                 <p className="text-primary font-medium">
@@ -181,6 +177,23 @@ export const LocationSwitcher = () => {
           open={isManageDialogOpen}
           onOpenChange={setManageDialogOpen}
         />
+        <Dialog
+          open={isLocationPickerOpen}
+          onOpenChange={setLocationPickerOpen}
+        >
+          <DialogContent className="max-w-xl border-none bg-transparent p-0 shadow-none">
+            <div className="max-h-[85vh] overflow-y-auto rounded-md border border-border-muted bg-white p-6 shadow-md">
+              <DialogTitle className="sr-only">
+                Seleccionar ubicación
+              </DialogTitle>
+              <LocationModal
+                isAuthenticated={isAuthenticated}
+                onLocationSaved={() => setLocationPickerOpen(false)}
+                variant="compact"
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       </DropdownMenu>
     </div>
   );
