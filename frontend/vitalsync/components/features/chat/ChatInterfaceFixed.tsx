@@ -334,9 +334,9 @@ También puedes usar los botones rápidos arriba o las plantillas del lado derec
             <Button
               variant="ghost"
               size="icon-lg"
-              className="text-[var(--foreground)] hover:bg-[var(--secondary)]"
+              className="text-[var(--foreground)] hover:bg-[var(--secondary)] group"
             >
-              <Home className="w-7xl h-7xl" />
+              <Home className="w-7xl h-7xl group-hover:text-foreground" />
             </Button>
           </Link>
         </div>

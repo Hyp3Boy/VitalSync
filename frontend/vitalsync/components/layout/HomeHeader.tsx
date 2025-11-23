@@ -6,6 +6,7 @@ import { Stethoscope } from 'lucide-react';
 import Link from 'next/link';
 import { LocationSwitcher } from './LocationSwitcher';
 import UserMenu from './UserMenu';
+import Image from 'next/image';
 
 export default function HomeHeader() {
   const { user, status } = useCurrentUser();
@@ -15,7 +16,12 @@ export default function HomeHeader() {
       <nav className="flex justify-between items-center">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2 text-xl font-bold">
-            <Stethoscope className="h-7 w-7 text-green-600" />
+            <Image
+              src="/assets/images/logo.png"
+              alt="VitalSync"
+              width={40}
+              height={40}
+            />
             <span>VitalSync</span>
           </Link>
         </div>

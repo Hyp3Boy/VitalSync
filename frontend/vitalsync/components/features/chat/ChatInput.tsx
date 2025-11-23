@@ -1,25 +1,25 @@
-'use client'
+'use client';
 
-import React, { useState } from 'react'
-import { Paperclip, Send } from 'lucide-react'
-import { useSendMessage } from '@/hooks/useChat'
+import React, { useState } from 'react';
+import { Paperclip, Send } from 'lucide-react';
+import { useSendMessage } from '@/hooks/useChat';
 
 export default function ChatInput() {
-  const [value, setValue] = useState('')
-  const { send, isLoading } = useSendMessage()
+  const [value, setValue] = useState('');
+  const { send, isLoading } = useSendMessage();
 
   const submit = (e?: React.FormEvent) => {
-    e?.preventDefault()
-    const text = value.trim()
-    if (!text) return
-    send(text)
-    setValue('')
-  }
+    e?.preventDefault();
+    const text = value.trim();
+    if (!text) return;
+    send(text);
+    setValue('');
+  };
 
   return (
     <form
       onSubmit={submit}
-      className="flex w-full items-center gap-3 rounded-full bg-[#1b1b1b] px-5 py-3 text-white shadow-[0_15px_40px_rgba(0,0,0,0.25)]"
+      className="flex w-full items-center gap-3 rounded-full bg-[#1b1b1b] px-5 py-3 text-white shadow-[0_15px_40px_rgba(0,0,0,0.25)] h-14"
     >
       <button
         type="button"
@@ -43,5 +43,5 @@ export default function ChatInput() {
         <Send className="size-4" />
       </button>
     </form>
-  )
+  );
 }

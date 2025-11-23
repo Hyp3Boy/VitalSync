@@ -9,7 +9,7 @@ export interface Clinic {
   name: string;
   address: string;
   distance: string;
-  type: 'Clínica' | 'Hospital' | 'Posta';
+  type: 'Clínica' | 'Hospital' | 'Posta' | 'Consultorio';
   latitude?: number;
   longitude?: number;
   rating?: number;
@@ -35,6 +35,10 @@ const typeInfo = {
   Posta: {
     icon: <Stethoscope className="h-5 w-5 text-green-500" />,
     badgeVariant: 'secondary' as const,
+  },
+  Consultorio: {
+    icon: <Stethoscope className="h-5 w-5 text-purple-500" />,
+    badgeVariant: 'outline' as const,
   },
 };
 

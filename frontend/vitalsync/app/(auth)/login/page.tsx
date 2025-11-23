@@ -3,6 +3,7 @@
 import { AuthForm } from '@/components/features/authentication/AuthForm';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useAuthStore } from '@/store/useAuthStore';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 export default function LoginPage() {
@@ -40,7 +41,12 @@ export default function LoginPage() {
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center p-4 sm:p-6 md:p-8">
       <div className="w-full max-w-lg">
         <header className="flex w-full items-center justify-center gap-3 py-8 text-center text-brown-accent">
-          <div className="size-10 text-primary">Icono</div>
+          <Image
+            src="/assets/images/logo.png"
+            alt="VitalSync"
+            width={40}
+            height={40}
+          />
           <h1 className="text-3xl font-bold tracking-tight">VitalSync</h1>
         </header>
         <AuthForm />

@@ -54,7 +54,7 @@ export const EmergencyMap = () => {
   }, [hasUserCoords, location]);
 
   const centersWithDistance = useMemo(() => {
-    if (!centers.length) return [];
+    if (!centers?.length) return [];
     return centers.map((center) => {
       const distance = haversineDistanceKm(userCoordinates, {
         latitude: center.latitude,
