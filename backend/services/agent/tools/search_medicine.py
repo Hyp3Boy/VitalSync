@@ -11,7 +11,7 @@ import requests
 import typesense
 from pydantic_ai import ModelRetry, RunContext
 
-from schemas.meds import Medication, MedicationWithPriceAndStore
+from schemas.agent_meds import Medication, MedicationWithPriceAndStore
 
 logger = logging.getLogger(__name__)
 
