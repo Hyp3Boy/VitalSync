@@ -4,6 +4,7 @@ export interface UserProfile {
   id: string;
   fullName: string;
   email: string;
-  role: 'patient' | 'doctor' | 'admin';
+  phone: string;
+  password: string;
   profilePicturePath?: string | null;
 }

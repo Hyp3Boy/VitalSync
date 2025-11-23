@@ -140,15 +140,14 @@ const slashCommands = [
 ];
 
 export default function ChatInterfaceFixed() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content:
-        '¡Hola! Soy tu asistente médico AI. Estoy aquí para ayudarte a encontrar centros de salud, médicos especialistas, información sobre medicamentos y más. ¿En qué puedo asistirte hoy?',
-      createdAt: new Date(),
-    },
-  ]);
+  const initialAssistant = {
+    id: '1',
+    role: 'assistant' as const,
+    content:
+      '¡Hola! Soy tu asistente médico AI. Estoy aquí para ayudarte a encontrar centros de salud, médicos especialistas, información sobre medicamentos y más. ¿En qué puedo asistirte hoy?',
+    createdAt: new Date(),
+  };
+  const [messages, setMessages] = useState<Message[]>([initialAssistant]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showSlashCommands, setShowSlashCommands] = useState(false);
@@ -165,8 +164,9 @@ export default function ChatInterfaceFixed() {
   // Handle slash commands
   useEffect(() => {
     const updateSlashCommands = () => {
-      if (input.startsWith('/')) {
-        const command = input.slice(1);
+      const value = input ?? '';
+      if (value.startsWith('/')) {
+        const command = value.slice(1);
         const filtered = slashCommands.filter((cmd) =>
           cmd.command.slice(1).toLowerCase().includes(command.toLowerCase())
         );
@@ -214,6 +214,11 @@ export default function ChatInterfaceFixed() {
       } else if (e.key === 'Escape') {
         setShowSlashCommands(false);
       }
+    }
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      const fakeEvent = { preventDefault: () => {} } as unknown as React.FormEvent;
+      void onSubmit(fakeEvent);
     }
   };
 
@@ -286,34 +291,69 @@ También puedes usar los botones rápidos arriba o las plantillas del lado derec
     return response;
   };
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (input.trim()) {
-      // Add user message
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        role: 'user',
-        content: input,
+    const text = (input ?? '').trim();
+    if (!text) return;
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: text,
+      createdAt: new Date(),
+    };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const controller = new AbortController();
+      const res = await fetch('/api/agent/medicine/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage.content }),
+        signal: controller.signal,
+      });
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let acc = '';
+      const msgId = (Date.now() + 1).toString();
+      const baseMessage: Message = {
+        id: msgId,
+        role: 'assistant',
+        content: '',
         createdAt: new Date(),
       };
-      setMessages((prev) => [...prev, userMessage]);
-
-      // Clear input
-      setInput('');
-      setIsLoading(true);
-
-      // Simulate AI response
-      setTimeout(() => {
-        const aiResponse = simulateAIResponse(input);
-        const aiMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: aiResponse,
-          createdAt: new Date(),
-        };
-        setMessages((prev) => [...prev, aiMessage]);
-        setIsLoading(false);
-      }, 1500);
+      setMessages((prev) => [...prev, baseMessage]);
+      if (reader) {
+        // stream chunks
+        const start = Date.now();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          acc += decoder.decode(value, { stream: true });
+          const formatted = acc
+            .replace(/\*\*([^*]+)\*\*/g, '**$1**')
+            .replace(/\n\s*\n/g, '\n\n')
+            .replace(/•\s*/g, '\n• ')
+            .replace(/\s*-\s*/g, ' • ');
+          setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, content: formatted } : m)));
+          if (Date.now() - start > 12000 && acc.length < 10) {
+            controller.abort();
+            break;
+          }
+        }
+      }
+    } catch (error) {
+      const fallback = simulateAIResponse(text).replace(/•\s*/g, '\n• ');
+      const aiMessage: Message = {
+        id: (Date.now() + 2).toString(),
+        role: 'assistant',
+        content: fallback || 'No pudimos obtener respuesta ahora. Te muestro opciones cercanas para atención.',
+        createdAt: new Date(),
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -334,9 +374,9 @@ También puedes usar los botones rápidos arriba o las plantillas del lado derec
             <Button
               variant="ghost"
               size="icon-lg"
-              className="text-[var(--foreground)] hover:bg-[var(--secondary)]"
+              className="text-foreground hover:bg-secondary group"
             >
-              <Home className="w-7xl h-7xl" />
+              <Home className="w-7xl h-7xl group-hover:text-foreground" />
             </Button>
           </Link>
         </div>
@@ -489,7 +529,7 @@ También puedes usar los botones rápidos arriba o las plantillas del lado derec
 
                   <Button
                     type="submit"
-                    disabled={isLoading || !input.trim()}
+                    disabled={isLoading || !(input ?? '').trim()}
                     className="rounded-2xl bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed px-6 shadow-lg hover:shadow-xl transition-all"
                   >
                     <Send className="w-4 h-4" />
