@@ -1,39 +1,24 @@
 from pydantic import BaseModel
 
 
-class MedicationSearchRequest(BaseModel):
-    name: str | None = None
-    description: str | None = None
-    top_k: int = 10
+class Medication(BaseModel):
+    comp_name: str              # nombre_comp
+    name: str                   # nombreProducto
+    concentration: str          # concent
+    pharmaceutical_form: str    # nombreFormaFarmaceutica
+    group: int                  # grupo
+    FFgroup: str                # codGrupoFF
 
-
-class MedicationSummary(BaseModel):
-    id: str
-    name: str
-    generic: bool
-    description: str
-    price: float
-    pharmacy: str
-
-
-class MedicationsListResponse(BaseModel):
-    code: int
-    data: list[MedicationSummary]
-
-
-class MedicationDetail(BaseModel):
-    id: str
-    name: str
-    generic: bool
-    description: str
-    price: float
-    pharmacy: str
-    ingredients: str
-    side_effects: str
-    usage: str
-    dosage: str
-
-
-class MedicationDetailResponse(BaseModel):
-    code: int
-    data: MedicationDetail
+class MedicationWithPriceAndStore(Medication):
+    # nombreProducto
+    # concent
+    # nomGrupoFF -> nombreFormaFarmaceutica
+    # grupo
+    # codGrupoFF
+    medication_code: int    # codProdE
+    price: float            # precio2
+    store_code: str          # codEstab
+    store_address: str       # direccion
+    store_telephone: str     # telefono
+    store_name: str          # nombreComercial
+    
