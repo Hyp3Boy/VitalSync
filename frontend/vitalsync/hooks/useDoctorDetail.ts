@@ -6,7 +6,7 @@ import {
   fetchDoctorDetail,
   submitDoctorReview,
 } from '@/services/doctorService';
-import { toast } from 'sonner';
+import { notifyError, notifySuccess } from '@/lib/utils/toast';
 
 export const useDoctorDetail = (doctorId: string) => {
   const client = useQueryClient();
@@ -16,7 +16,7 @@ export const useDoctorDetail = (doctorId: string) => {
     queryFn: () => fetchDoctorDetail(doctorId),
     staleTime: 1000 * 60 * 5,
     onError: () => {
-      toast.error('No pudimos cargar la información de este doctor.')
+      notifyError(new Error('No pudimos cargar la información de este doctor.'), 'No pudimos cargar la información de este doctor.')
     },
   });
 
@@ -24,15 +24,11 @@ export const useDoctorDetail = (doctorId: string) => {
     mutationFn: (payload: CreateReviewPayload) =>
       submitDoctorReview(doctorId, payload),
     onSuccess: async () => {
-      toast.success('Tu opinión fue enviada. ¡Gracias!');
+      notifySuccess('Tu opinión fue enviada. ¡Gracias!');
       await client.invalidateQueries({ queryKey: ['doctor-detail', doctorId] });
     },
     onError: (error) => {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : 'No pudimos guardar tu opinión.'
-      );
+      notifyError(error, 'No pudimos guardar tu opinión.');
     },
   });
 

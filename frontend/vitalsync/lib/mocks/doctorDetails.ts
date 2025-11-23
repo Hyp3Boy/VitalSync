@@ -1,4 +1,4 @@
-import { DoctorDetailResponse } from '@/types/doctor'; // Asegúrate de importar Review si lo tienes definido
+import { DoctorDetailResponse, DoctorScheduleDay } from '@/types/doctor';
 import { mockDoctors } from './doctors';
 
 // --- 1. Bancos de Datos para Variedad ---
@@ -46,6 +46,21 @@ const userNames = [
   'Andrea Castillo',
   'Roberto Sánchez',
   'Lucía Benavides',
+];
+
+const scheduleTemplates: DoctorScheduleDay[][] = [
+  [
+    { day: 'Lunes, 15 de Julio', slots: ['9:00 AM', '11:30 AM'] },
+    { day: 'Martes, 16 de Julio', slots: ['2:00 PM'] },
+    { day: 'Miércoles, 17 de Julio', slots: [] },
+    { day: 'Jueves, 18 de Julio', slots: null },
+  ],
+  [
+    { day: 'Lunes, 22 de Julio', slots: ['10:00 AM'] },
+    { day: 'Martes, 23 de Julio', slots: ['8:30 AM', '12:30 PM'] },
+    { day: 'Miércoles, 24 de Julio', slots: ['3:00 PM'] },
+    { day: 'Viernes, 26 de Julio', slots: [] },
+  ],
 ];
 
 // --- 2. Funciones Helper ---
@@ -100,6 +115,31 @@ const generateReviews = (
   );
 };
 
+const buildSchedule = (random: () => number) => {
+  if (random() > 0.85) {
+    return null;
+  }
+
+  const template =
+    scheduleTemplates[Math.floor(random() * scheduleTemplates.length)];
+
+  return template.map((entry) => {
+    if (!entry.slots) {
+      return { ...entry, slots: null };
+    }
+
+    const slots = entry.slots.filter(() => random() > 0.35);
+    if (slots.length === 0 && random() > 0.5) {
+      return { ...entry, slots: null };
+    }
+
+    return {
+      ...entry,
+      slots: slots.length > 0 ? slots : entry.slots,
+    };
+  });
+};
+
 // --- 3. Generación del Mapa de Detalles ---
 
 const detailMap: Record<string, DoctorDetailResponse> = {};
@@ -125,6 +165,16 @@ mockDoctors.forEach((doctor, index) => {
         doctor.location === 'Cusco' || doctor.location === 'Arequipa'
           ? `Av. Principal 123, ${doctor.location}`
           : `Av. Javier Prado 45${index}, ${doctor.location}`, // Dirección fake en Lima
+      specialties: doctor.specialties ?? [doctor.specialty],
+      schedule: buildSchedule(random),
+      coordinates:
+        doctor.location.includes('Lima')
+          ? { latitude: -12.121, longitude: -77.030 }
+          : doctor.location === 'Arequipa'
+            ? { latitude: -16.3989, longitude: -71.535 }
+          : doctor.location === 'Cusco'
+          ? { latitude: -13.516, longitude: -71.978 }
+          : undefined,
     },
     reviews: generateReviews(doctor.id, reviewCount, random),
   };

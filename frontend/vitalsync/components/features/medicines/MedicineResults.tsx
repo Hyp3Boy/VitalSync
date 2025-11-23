@@ -53,8 +53,8 @@ export const MedicineResults = ({ query }: MedicineResultsProps) => {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-destructive">
-        No pudimos obtener los resultados. Intenta de nuevo más tarde.
+      <div className="rounded-xl border border-border/60 bg-muted/20 p-4 text-sm text-muted-foreground">
+        No pudimos obtener los resultados en este momento.
       </div>
     );
   }

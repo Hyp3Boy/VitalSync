@@ -18,6 +18,13 @@ const buildMockResponse = (id: string): DoctorDetailResponse | undefined => {
       languages: ['Español'],
       education: 'Universidad Peruana Cayetano Heredia',
       clinicAddress: doctor.location,
+      specialties: doctor.specialties ?? [doctor.specialty],
+      schedule: [
+        { day: 'Lunes, 15 de Julio', slots: ['9:00 AM', '11:30 AM'] },
+        { day: 'Martes, 16 de Julio', slots: ['2:00 PM'] },
+        { day: 'Miércoles, 17 de Julio', slots: null },
+      ],
+      coordinates: undefined,
     },
     reviews: [],
   };
@@ -29,15 +36,29 @@ export async function GET(
 ) {
   const { id } = params;
 
-  try {
-    const response = await api.get<DoctorDetailResponse>(`/doctors/${id}`);
-    return NextResponse.json(response.data);
-  } catch (error) {
-    console.warn('Falling back to mock doctor detail', error);
-    const data = buildMockResponse(id);
-    if (!data) {
-      return NextResponse.json({ message: 'Doctor no encontrado' }, { status: 404 });
+  const base = process.env.NEXT_PUBLIC_API_URL;
+  const skipRemote = (() => {
+    if (!base) return true;
+    try {
+      const remote = new URL(base);
+      return remote.origin === _request.nextUrl.origin;
+    } catch {
+      return true;
     }
-    return NextResponse.json(data);
+  })();
+
+  if (!skipRemote) {
+    try {
+      const response = await api.get<DoctorDetailResponse>(`/doctors/${id}`);
+      return NextResponse.json(response.data);
+    } catch (error) {
+      console.warn('Falling back to mock doctor detail', error);
+    }
   }
+
+  const data = buildMockResponse(id);
+  if (!data) {
+    return NextResponse.json({ message: 'Doctor no encontrado' }, { status: 404 });
+  }
+  return NextResponse.json(data);
 }

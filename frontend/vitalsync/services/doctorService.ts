@@ -4,6 +4,8 @@ import {
   DoctorQueryParams,
   DoctorReview,
 } from '@/types/doctor';
+import { doctorDetailResponseSchema, doctorListResponseSchema, doctorReviewSchema } from '@/lib/validations/apiSchemas';
+import { notifyError } from '@/lib/utils/toast';
 
 const buildQueryString = (params: DoctorQueryParams) => {
   const sp = new URLSearchParams();
@@ -27,7 +29,12 @@ export const fetchDoctors = async (
     throw new Error('No se pudo cargar la lista de doctores');
   }
 
-  return (await response.json()) as DoctorListResponse;
+  const data = (await response.json()) as unknown;
+  const parsed = doctorListResponseSchema.safeParse(data);
+  if (!parsed.success) {
+    notifyError(new Error('Respuesta inválida de listado de doctores'), 'Respuesta inválida de listado de doctores');
+  }
+  return parsed.success ? parsed.data : (data as DoctorListResponse);
 };
 
 export const fetchDoctorDetail = async (
@@ -39,7 +46,12 @@ export const fetchDoctorDetail = async (
     throw new Error('No se pudo cargar la información del profesional');
   }
 
-  return (await response.json()) as DoctorDetailResponse;
+  const data = (await response.json()) as unknown;
+  const parsed = doctorDetailResponseSchema.safeParse(data);
+  if (!parsed.success) {
+    notifyError(new Error('Respuesta inválida de detalle de doctor'), 'Respuesta inválida de detalle de doctor');
+  }
+  return parsed.success ? parsed.data : (data as DoctorDetailResponse);
 };
 
 export interface CreateReviewPayload {
@@ -47,6 +59,11 @@ export interface CreateReviewPayload {
   comment: string;
   authorName: string;
 }
+
+// BACKEND CONTRACTS:
+// GET /api/doctors/:id -> returns DoctorDetailResponse { doctor: DoctorDetail, reviews: DoctorReview[] }
+// POST /api/doctors/:id/reviews -> accepts CreateReviewPayload and returns DoctorReview
+// When connecting real backend, ensure these shapes match server responses.
 
 export const submitDoctorReview = async (
   doctorId: string,
@@ -64,5 +81,10 @@ export const submitDoctorReview = async (
     throw new Error('No se pudo enviar tu opinión.');
   }
 
-  return (await response.json()) as DoctorReview;
+  const data = (await response.json()) as unknown;
+  const parsed = doctorReviewSchema.safeParse(data);
+  if (!parsed.success) {
+    notifyError(new Error('Respuesta inválida al crear opinión'), 'Respuesta inválida al crear opinión');
+  }
+  return parsed.success ? parsed.data : (data as DoctorReview);
 };

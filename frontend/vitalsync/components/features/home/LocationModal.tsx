@@ -36,7 +36,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
-import { toast } from 'sonner';
+import { notifyError, notifySuccess } from '@/lib/utils/toast';
 
 const DEFAULT_VIEW_STATE = {
   latitude: -12.046374,
@@ -116,7 +116,7 @@ const LocationSearchForm = ({
             ? error.message
             : 'No pudimos buscar la dirección. Intenta nuevamente.';
         setSearchError(message);
-        toast.error(message);
+        notifyError(new Error(message), message);
       })
       .finally(() => {
         setIsSearching(false);
@@ -156,6 +156,7 @@ const LocationSearchForm = ({
     setSearchTerm('');
     setSelectedSuggestion(null);
     onLocationSaved?.();
+    notifySuccess('Ubicación establecida correctamente.');
   }
 
   const markers = useMemo(() => {
@@ -191,7 +192,7 @@ const LocationSearchForm = ({
       if (!result) {
         const message = 'No pudimos encontrar una dirección para ese punto.';
         setSearchError(message);
-        toast.error(message);
+        notifyError(new Error(message), message);
         setSelectedSuggestion(null);
         return;
       }
@@ -205,7 +206,7 @@ const LocationSearchForm = ({
           ? error.message
           : 'No pudimos convertir ese punto en una dirección.';
       setSearchError(message);
-      toast.error(message);
+      notifyError(new Error(message), message);
     } finally {
       setIsSearching(false);
     }

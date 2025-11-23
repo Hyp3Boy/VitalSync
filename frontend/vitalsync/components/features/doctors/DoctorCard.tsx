@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Doctor } from '@/types/doctor';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const renderStars = (rating: number) =>
   Array.from({ length: 5 }).map((_, index) => (
@@ -24,18 +25,30 @@ interface DoctorCardProps {
 }
 
 export const DoctorCard = ({ doctor }: DoctorCardProps) => {
+  const specialties = doctor.specialties?.length
+    ? doctor.specialties
+    : [doctor.specialty];
+  const initials = doctor.name
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
   return (
     <Card className="h-full border-border/60 bg-card/95 shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
-      <CardContent className="flex h-full flex-col gap-4 p-6">
+      <CardContent className="flex h-full flex-col gap-4">
         <div className="flex items-center gap-4">
-          <div
-            className="size-16 rounded-full border-4 border-primary/10 bg-cover bg-center"
-            style={{ backgroundImage: `url(${doctor.imageUrl})` }}
-          />
+          <Avatar className="size-16 border-4 border-primary/10 text-lg font-semibold">
+            {doctor.imageUrl ? (
+              <AvatarImage src={doctor.imageUrl} alt={doctor.name} />
+            ) : null}
+            <AvatarFallback className="bg-primary/10 text-primary">
+              {initials || 'Dr'}
+            </AvatarFallback>
+          </Avatar>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-              {doctor.specialty}
-            </p>
             <h3 className="text-xl font-bold text-foreground">{doctor.name}</h3>
             <p className="text-sm font-medium text-muted-foreground">
               CMP: {doctor.cmp}
@@ -43,6 +56,16 @@ export const DoctorCard = ({ doctor }: DoctorCardProps) => {
           </div>
         </div>
 
+            <div className="flex flex-wrap gap-1">
+              {specialties.map((spec) => (
+                <span
+                  key={spec}
+                  className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary"
+                >
+                  {spec}
+                </span>
+              ))}
+            </div>
         <div className="flex items-center gap-2 text-primary">
           {renderStars(doctor.rating)}
           <span className="text-xs font-medium text-muted-foreground">
