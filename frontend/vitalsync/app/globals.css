@@ -1,0 +1,124 @@
+/* Importa todas las funcionalidades de Tailwind CSS v4.1 */
+@import 'tailwindcss';
+
+/* Define la estrategia para el modo oscuro (basado en la clase .dark en un elemento padre) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* --- Variables de Shadcn UI para el Tema Claro --- */
+:root {
+  --background: #f5f3ee; /* Fondo marfil */
+  --foreground: #432f2b; /* Café principal */
+  --card: #ffffff;
+  --card-foreground: #432f2b;
+  --popover: #ffffff;
+  --popover-foreground: #432f2b;
+  --primary: #5a8a58; /* Interacciones y CTA */
+  --primary-foreground: #ffffff;
+  --secondary: #ede0ce; /* Complementa el café principal */
+  --secondary-foreground: #432f2b;
+  --muted: #f3ecda;
+  --muted-foreground: #7d6a60;
+  --accent: #432f2b; /* Acentos oscuros */
+  --accent-foreground: #fff8ee;
+  --destructive: #f44336;
+  --border: #dfd2bd;
+  --input: #dfd2bd;
+  --ring: #5a8a58;
+  --radius: 0.64rem;
+}
+
+/* --- Configuración del Tema de Tailwind CSS --- */
+@theme {
+  /* --- Tokens de Shadcn UI para utilidades de Tailwind --- */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-error: var(--destructive);
+
+  /* --- Fuentes --- */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+
+  /* --- Texto y Neutros --- */
+  --color-text-primary: #5d4037;
+  --color-text-secondary: #7f6b60;
+  --color-text-tertiary: #b09b8d;
+
+  /* --- Superficies --- */
+  --color-surface: #ffffff;
+  --color-surface-soft: #fdf8ef;
+
+  /* --- Estados --- */
+  --color-danger: #f44336;
+  --color-danger-soft: #fde2de;
+  --color-warning: #ff9800;
+  --color-warning-soft: #ffe3c1;
+
+  /* --- Bordes --- */
+  --color-border-strong: #cebfa9;
+  --color-border-muted: #f1e7d4;
+
+  /* --- Radios de Borde --- */
+  --radius-sm: 0.32rem;
+  --radius: 0.64rem;
+  --radius-md: 0.6rem;
+  --radius-lg: 1.25rem;
+  --radius-pill: 999px;
+
+  /* --- Sombras --- */
+  --shadow-soft: 0 18px 40px rgba(80, 63, 27, 0.12);
+  --shadow-card: 0 24px 55px rgba(106, 79, 40, 0.14);
+  --shadow-lifted: 0 35px 70px rgba(34, 33, 31, 0.18);
+
+  /* --- Tokens de Tipografía (Mapeados a namespaces de Tailwind) --- */
+  --text-title-xl: 2.75rem;
+  --text-title-lg: 2.25rem;
+  --text-title-md: 1.5rem;
+  --text-title-sm: 1.25rem;
+  --text-body-lg: 1.125rem;
+  --text-body-md: 1rem;
+  --text-body-sm: 0.875rem;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+}
+
+/* --- Variables de Shadcn UI para el Modo Oscuro --- */
+.dark {
+  --background: #1f1a17;
+  --foreground: #f5e9da;
+  --card: #261f1b;
+  --card-foreground: #f5e9da;
+  --popover: #261f1b;
+  --popover-foreground: #f5e9da;
+  --primary: #4cae50;
+  --primary-foreground: #f9fff5;
+  --secondary: #3c2d28;
+  --secondary-foreground: #f5e9da;
+  --muted: #3c2d28;
+  --muted-foreground: #b39e91;
+  --accent: #5d4037;
+  --accent-foreground: #fff8ee;
+  --destructive: #ff6a5c;
+  --border: #3d2f2a;
+  --input: #3d2f2a;
+  --ring: #4cae50;
+}
