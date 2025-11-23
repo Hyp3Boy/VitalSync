@@ -3,7 +3,7 @@
 from fastapi import APIRouter
 from schemas.meds import *
 from services.meds import MedService
-router = APIRouter(tags=["medications"])
+router = APIRouter(prefix="/meds",tags=["medications"])
 
 @router.post("/search", response_model=MedicationsListResponse)
 def search_medications(payload: MedicationSearchRequest):
